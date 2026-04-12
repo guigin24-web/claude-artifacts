@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gin's Claude Artifacts</title>
+<style>
+  :root {
+    --bg: #0f0f0d;
+    --surface: #1a1a17;
+    --surface2: #222220;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #e8e6de;
+    --muted: #7a7870;
+    --accent: #c9f27a;
+    --accent2: #8fd4a8;
+    --radius: 10px;
+    --font: 'IBM Plex Mono', 'Courier New', monospace;
+    --sans: system-ui, -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* Header */
+  header {
+    border-bottom: 0.5px solid var(--border);
+    padding: 2rem 2rem 1.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .header-top {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+  h1 {
+    font-family: var(--font);
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+  .header-slash {
+    color: var(--muted);
+    font-family: var(--font);
+    font-size: 18px;
+  }
+  .header-sub {
+    font-family: var(--font);
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--text);
+  }
+  .header-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* Stats bar */
+  .stats {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1rem 2rem;
+    display: flex;
+    gap: 24px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .stat {
+    font-family: var(--font);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .stat span {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* Filter tabs */
+  .filters {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1.25rem 2rem 0;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 0.5px solid var(--border2);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: var(--font);
+    transition: all 0.15s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(201,242,122,0.06);
+  }
+
+  /* Grid */
+  .grid {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1.25rem 2rem 3rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 18px 14px;
+    text-decoration: none;
+    display: block;
+    transition: border-color 0.15s, background 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .card:hover {
+    border-color: var(--border2);
+    background: var(--surface2);
+  }
+  .card:hover .card-arrow { opacity: 1; }
+  .card-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-family: var(--font);
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+  .tag-notes    { background: rgba(143,212,168,0.12); color: var(--accent2); border: 0.5px solid rgba(143,212,168,0.2); }
+  .tag-tool     { background: rgba(201,242,122,0.10); color: var(--accent);  border: 0.5px solid rgba(201,242,122,0.2); }
+  .tag-projects { background: rgba(100,160,255,0.10); color: #82b4f7;        border: 0.5px solid rgba(100,160,255,0.2); }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+  .card-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 14px;
+  }
+  .card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-date {
+    font-family: var(--font);
+    font-size: 10px;
+    color: var(--muted);
+    opacity: 0.7;
+  }
+  .card-arrow {
+    font-size: 12px;
+    color: var(--accent);
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  /* Empty state */
+  .empty {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 3rem;
+    color: var(--muted);
+    font-size: 13px;
+    font-family: var(--font);
+  }
+
+  /* Footer */
+  footer {
+    border-top: 0.5px solid var(--border);
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1.25rem 2rem;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--font);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: gap;
+  }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+
+  @media (max-width: 600px) {
+    header, .stats, .filters, .grid, footer { padding-left: 1rem; padding-right: 1rem; }
+    .grid { grid-template-columns: 1fr; }
+    h1, .header-slash, .header-sub { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <span class="header-sub">guigin24-web</span>
+    <span class="header-slash">/</span>
+    <span class="header-sub">claude-artifacts</span>
+  </div>
+  <p class="header-desc">Interactive tools, diagrams, and reference artifacts built with Claude. Click any card to open.</p>
+</header>
+
+<div class="stats">
+  <div class="stat"><span id="count">1</span> artifact</div>
+  <div class="stat">last updated <span>Apr 2026</span></div>
+</div>
+
+<div class="filters">
+  <button class="filter-btn active" onclick="filter('all')">All</button>
+  <button class="filter-btn" onclick="filter('notes')">Notes</button>
+  <button class="filter-btn" onclick="filter('tool')">Tools</button>
+  <button class="filter-btn" onclick="filter('projects')">Projects</button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<footer>
+  <span>Built with Claude · Hosted on GitHub Pages</span>
+  <a href="https://github.com/guigin24-web/claude-artifacts" target="_blank">github ↗</a>
+</footer>
+
+<script>
+const artifacts = [
+  {
+    title: "AI Value Chain Diagram",
+    desc: "Interactive map of the AI industry ecosystem — 28 player types across 7 layers from compute infrastructure to governance. Tap any node to explore roles and examples.",
+    file: "ai_value_chain_diagram.html",
+    tag: "notes",
+    date: "Apr 2026"
+  },
+  // ADD NEW ARTIFACTS BELOW THIS LINE — copy the block above and update the fields
+  // {
+  //   title: "Your Artifact Title",
+  //   desc: "Short description of what it does.",
+  //   file: "your_filename.html",
+  //   tag: "tool",          // options: notes | tool | projects
+  //   date: "Apr 2026"
+  // },
+];
+
+const tagLabels = {
+  notes: "Notes",
+  tool: "Tool",
+  projects: "Projects"
+};
+
+let current = 'all';
+
+function render(items) {
+  const grid = document.getElementById('grid');
+  if (items.length === 0) {
+    grid.innerHTML = '<div class="empty">no artifacts in this category yet</div>';
+    return;
+  }
+  grid.innerHTML = items.map(a => `
+    <a class="card" href="${a.file}" data-tag="${a.tag}">
+      <span class="card-tag tag-${a.tag}">${tagLabels[a.tag]}</span>
+      <div class="card-title">${a.title}</div>
+      <div class="card-desc">${a.desc}</div>
+      <div class="card-meta">
+        <span class="card-date">${a.date}</span>
+        <span class="card-arrow">open ↗</span>
+      </div>
+    </a>
+  `).join('');
+}
+
+function filter(tag) {
+  current = tag;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  const filtered = tag === 'all' ? artifacts : artifacts.filter(a => a.tag === tag);
+  render(filtered);
+  document.getElementById('count').textContent = filtered.length;
+}
+
+// Initial render
+render(artifacts);
+document.getElementById('count').textContent = artifacts.length;
+</script>
+</body>
+</html>
