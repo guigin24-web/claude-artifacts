@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Value Chain Diagram</title>
+<style>
+  :root {
+    --color-background-primary: #ffffff;
+    --color-background-secondary: #f5f4f0;
+    --color-text-primary: #1a1a18;
+    --color-text-secondary: #5f5e5a;
+    --color-text-tertiary: #9c9a92;
+    --color-border-tertiary: rgba(0,0,0,0.12);
+    --color-border-secondary: rgba(0,0,0,0.2);
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    --font-sans: system-ui, -apple-system, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-background-primary: #1e1e1c;
+      --color-background-secondary: #282825;
+      --color-text-primary: #e8e6de;
+      --color-text-secondary: #9c9a92;
+      --color-text-tertiary: #6b6966;
+      --color-border-tertiary: rgba(255,255,255,0.1);
+      --color-border-secondary: rgba(255,255,255,0.18);
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-sans);
+    background: var(--color-background-secondary);
+    color: var(--color-text-primary);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+  .container { max-width: 760px; margin: 0 auto; }
+  h1 {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: var(--color-text-primary);
+  }
+  .subtitle {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    margin-bottom: 16px;
+  }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .leg { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-text-secondary); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .panel {
+    background: var(--color-background-primary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    padding: 16px;
+    margin-top: 12px;
+  }
+  .panel h3 { font-size: 15px; font-weight: 500; margin-bottom: 4px; color: var(--color-text-primary); }
+  .panel .role { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 10px; line-height: 1.6; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .tag { font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 500; }
+  .examples { font-size: 12px; color: var(--color-text-secondary); }
+  .examples strong { color: var(--color-text-primary); font-weight: 500; }
+  .close-btn {
+    float: right;
+    font-size: 12px;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    padding: 2px 6px;
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-md);
+    background: transparent;
+  }
+  .close-btn:hover { color: var(--color-text-primary); }
+  .node { cursor: pointer; }
+  .node rect { transition: opacity 0.15s; }
+  .node:hover rect { opacity: 0.8; }
+  .caption {
+    font-size: 11px;
+    color: var(--color-text-tertiary);
+    margin-top: 10px;
+    text-align: center;
+  }
+  svg { display: block; width: 100%; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>AI Value Chain</h1>
+  <p class="subtitle">An interactive map of the AI industry ecosystem — tap any node to explore</p>
+
+  <div class="legend">
+    <div class="leg"><div class="dot" style="background:#7F77DD"></div>Infrastructure & compute</div>
+    <div class="leg"><div class="dot" style="background:#1D9E75"></div>Foundation models</div>
+    <div class="leg"><div class="dot" style="background:#E85D24"></div>Developer tools & MLOps</div>
+    <div class="leg"><div class="dot" style="background:#D4537E"></div>AI applications</div>
+    <div class="leg"><div class="dot" style="background:#378ADD"></div>Distribution & access</div>
+    <div class="leg"><div class="dot" style="background:#BA7517"></div>Governance & safety</div>
+    <div class="leg"><div class="dot" style="background:#888780"></div>Data layer</div>
+  </div>
+
+  <svg id="chain" viewBox="0 0 680 780" role="img">
+    <title>AI value chain — seven layers from compute to data</title>
+    <desc>Interactive diagram of the AI industry ecosystem showing seven horizontal layers</desc>
+    <defs>
+      <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+        <path d="M2 1L8 5L2 9" fill="none" stroke="#9c9a92" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker>
+    </defs>
+
+    <!-- Layer bands -->
+    <rect x="0" y="28" width="680" height="104" fill="var(--color-background-secondary)" opacity="0.7"/>
+    <rect x="0" y="144" width="680" height="94" fill="var(--color-background-primary)" opacity="0.7"/>
+    <rect x="0" y="250" width="680" height="94" fill="var(--color-background-secondary)" opacity="0.7"/>
+    <rect x="0" y="356" width="680" height="104" fill="var(--color-background-primary)" opacity="0.7"/>
+    <rect x="0" y="472" width="680" height="94" fill="var(--color-background-secondary)" opacity="0.7"/>
+    <rect x="0" y="578" width="680" height="94" fill="var(--color-background-primary)" opacity="0.7"/>
+    <rect x="0" y="682" width="680" height="88" fill="var(--color-background-secondary)" opacity="0.7"/>
+
+    <!-- Layer labels -->
+    <text x="8" y="80" text-anchor="middle" dominant-baseline="central" transform="rotate(-90,8,80)" style="font-size:9px;fill:var(--color-text-tertiary);font-family:var(--font-sans)">COMPUTE</text>
+    <text x="8" y="191" text-anchor="middle" dominant-baseline="central" transform="rotate(-90,8,191)" style="font-size:9px;fill:var(--color-text-tertiary);font-family:var(--font-sans)">MODELS</text>
+    <text x="8" y="297" text-anchor="middle" dominant-baseline="central" transform="rotate(-90,8,297)" style="font-size:9px;fill:var(--color-text-tertiary);font-family:var(--font-sans)">TOOLS</text>
+    <text x="8" y="408" text-anchor="middle" dominant-baseline="central" transform="rotate(-90,8,408)" style="font-size:9px;fill:var(--color-text-tertiary);font-family:var(--font-sans)">APPS</text>
+    <text x="8" y="519" text-anchor="middle" dominant-baseline="central" transform="rotate(-90,8,519)" style="font-size:9px;fill:var(--color-text-tertiary);font-family:var(--font-sans)">DISTRIB</text>
+    <text x="8" y="625" text-anchor="middle" dominant-baseline="central" transform="rotate(-90,8,625)" style="font-size:9px;fill:var(--color-text-tertiary);font-family:var(--font-sans)">GOV</text>
+    <text x="8" y="726" text-anchor="middle" dominant-baseline="central" transform="rotate(-90,8,726)" style="font-size:9px;fill:var(--color-text-tertiary);font-family:var(--font-sans)">DATA</text>
+
+    <!-- Flow arrows -->
+    <line x1="340" y1="132" x2="340" y2="142" stroke="#9c9a92" stroke-width="1" marker-end="url(#arr)" stroke-dasharray="3 2"/>
+    <line x1="340" y1="238" x2="340" y2="248" stroke="#9c9a92" stroke-width="1" marker-end="url(#arr)" stroke-dasharray="3 2"/>
+    <line x1="340" y1="344" x2="340" y2="354" stroke="#9c9a92" stroke-width="1" marker-end="url(#arr)" stroke-dasharray="3 2"/>
+    <line x1="340" y1="460" x2="340" y2="470" stroke="#9c9a92" stroke-width="1" marker-end="url(#arr)" stroke-dasharray="3 2"/>
+    <line x1="340" y1="566" x2="340" y2="576" stroke="#9c9a92" stroke-width="1" marker-end="url(#arr)" stroke-dasharray="3 2"/>
+    <line x1="340" y1="672" x2="340" y2="680" stroke="#9c9a92" stroke-width="1" marker-end="url(#arr)" stroke-dasharray="3 2"/>
+
+    <!-- LAYER 1: COMPUTE -->
+    <g class="node" onclick="show('cloud')">
+      <rect x="22" y="36" width="130" height="52" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="0.5"/>
+      <text x="87" y="57" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#3C3489;font-family:var(--font-sans)">Cloud hyperscalers</text>
+      <text x="87" y="73" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#534AB7;font-family:var(--font-sans)">AWS · Azure · GCP</text>
+    </g>
+    <g class="node" onclick="show('chip')">
+      <rect x="168" y="36" width="130" height="52" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="0.5"/>
+      <text x="233" y="57" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#3C3489;font-family:var(--font-sans)">Chip designers</text>
+      <text x="233" y="73" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#534AB7;font-family:var(--font-sans)">NVIDIA · AMD · Intel</text>
+    </g>
+    <g class="node" onclick="show('infra')">
+      <rect x="314" y="36" width="130" height="52" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="0.5"/>
+      <text x="379" y="57" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#3C3489;font-family:var(--font-sans)">AI infra specialists</text>
+      <text x="379" y="73" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#534AB7;font-family:var(--font-sans)">CoreWeave · Lambda</text>
+    </g>
+    <g class="node" onclick="show('edge')">
+      <rect x="460" y="36" width="130" height="52" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-width="0.5"/>
+      <text x="525" y="57" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#3C3489;font-family:var(--font-sans)">Edge & on-device</text>
+      <text x="525" y="73" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#534AB7;font-family:var(--font-sans)">Apple · Qualcomm</text>
+    </g>
+
+    <!-- LAYER 2: FOUNDATION MODELS -->
+    <g class="node" onclick="show('frontier')">
+      <rect x="22" y="152" width="145" height="52" rx="8" fill="#E1F5EE" stroke="#1D9E75" stroke-width="0.5"/>
+      <text x="94" y="173" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#085041;font-family:var(--font-sans)">Frontier model labs</text>
+      <text x="94" y="189" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#0F6E56;font-family:var(--font-sans)">Anthropic · OpenAI · Google</text>
+    </g>
+    <g class="node" onclick="show('open')">
+      <rect x="180" y="152" width="140" height="52" rx="8" fill="#E1F5EE" stroke="#1D9E75" stroke-width="0.5"/>
+      <text x="250" y="173" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#085041;font-family:var(--font-sans)">Open-source models</text>
+      <text x="250" y="189" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#0F6E56;font-family:var(--font-sans)">Meta · Mistral · DeepSeek</text>
+    </g>
+    <g class="node" onclick="show('multimodal')">
+      <rect x="334" y="152" width="140" height="52" rx="8" fill="#E1F5EE" stroke="#1D9E75" stroke-width="0.5"/>
+      <text x="404" y="173" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#085041;font-family:var(--font-sans)">Specialised models</text>
+      <text x="404" y="189" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#0F6E56;font-family:var(--font-sans)">ElevenLabs · Midjourney</text>
+    </g>
+    <g class="node" onclick="show('embed')">
+      <rect x="490" y="152" width="130" height="52" rx="8" fill="#E1F5EE" stroke="#1D9E75" stroke-width="0.5"/>
+      <text x="555" y="173" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#085041;font-family:var(--font-sans)">Embedding & search</text>
+      <text x="555" y="189" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#0F6E56;font-family:var(--font-sans)">Cohere · Pinecone</text>
+    </g>
+
+    <!-- LAYER 3: DEVELOPER TOOLS -->
+    <g class="node" onclick="show('api')">
+      <rect x="22" y="258" width="120" height="52" rx="8" fill="#FAECE7" stroke="#D85A30" stroke-width="0.5"/>
+      <text x="82" y="279" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#711B0C;font-family:var(--font-sans)">API & SDK layers</text>
+      <text x="82" y="295" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#993C1D;font-family:var(--font-sans)">Anthropic API · OpenAI</text>
+    </g>
+    <g class="node" onclick="show('mlops')">
+      <rect x="156" y="258" width="130" height="52" rx="8" fill="#FAECE7" stroke="#D85A30" stroke-width="0.5"/>
+      <text x="221" y="279" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#711B0C;font-family:var(--font-sans)">MLOps & training</text>
+      <text x="221" y="295" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#993C1D;font-family:var(--font-sans)">Weights&amp;Biases · Modal</text>
+    </g>
+    <g class="node" onclick="show('agent')">
+      <rect x="300" y="258" width="130" height="52" rx="8" fill="#FAECE7" stroke="#D85A30" stroke-width="0.5"/>
+      <text x="365" y="279" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#711B0C;font-family:var(--font-sans)">Agent frameworks</text>
+      <text x="365" y="295" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#993C1D;font-family:var(--font-sans)">LangChain · LlamaIndex</text>
+    </g>
+    <g class="node" onclick="show('eval')">
+      <rect x="444" y="258" width="126" height="52" rx="8" fill="#FAECE7" stroke="#D85A30" stroke-width="0.5"/>
+      <text x="507" y="279" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#711B0C;font-family:var(--font-sans)">Eval & observability</text>
+      <text x="507" y="295" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#993C1D;font-family:var(--font-sans)">Braintrust · Helicone</text>
+    </g>
+
+    <!-- LAYER 4: AI APPLICATIONS -->
+    <g class="node" onclick="show('copilot')">
+      <rect x="22" y="364" width="120" height="52" rx="8" fill="#FBEAF0" stroke="#D4537E" stroke-width="0.5"/>
+      <text x="82" y="385" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#4B1528;font-family:var(--font-sans)">Coding assistants</text>
+      <text x="82" y="401" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#993556;font-family:var(--font-sans)">GitHub Copilot · Cursor</text>
+    </g>
+    <g class="node" onclick="show('biz')">
+      <rect x="156" y="364" width="130" height="52" rx="8" fill="#FBEAF0" stroke="#D4537E" stroke-width="0.5"/>
+      <text x="221" y="385" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#4B1528;font-family:var(--font-sans)">Business AI tools</text>
+      <text x="221" y="401" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#993556;font-family:var(--font-sans)">Notion AI · HubSpot</text>
+    </g>
+    <g class="node" onclick="show('vert')">
+      <rect x="300" y="364" width="130" height="52" rx="8" fill="#FBEAF0" stroke="#D4537E" stroke-width="0.5"/>
+      <text x="365" y="385" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#4B1528;font-family:var(--font-sans)">Vertical AI apps</text>
+      <text x="365" y="401" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#993556;font-family:var(--font-sans)">Harvey · Abridge</text>
+    </g>
+    <g class="node" onclick="show('consumer')">
+      <rect x="444" y="364" width="130" height="52" rx="8" fill="#FBEAF0" stroke="#D4537E" stroke-width="0.5"/>
+      <text x="509" y="385" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#4B1528;font-family:var(--font-sans)">Consumer AI apps</text>
+      <text x="509" y="401" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#993556;font-family:var(--font-sans)">ChatGPT · Claude.ai</text>
+    </g>
+
+    <!-- LAYER 5: DISTRIBUTION -->
+    <g class="node" onclick="show('mktplace')">
+      <rect x="22" y="480" width="140" height="52" rx="8" fill="#E6F1FB" stroke="#378ADD" stroke-width="0.5"/>
+      <text x="92" y="501" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#042C53;font-family:var(--font-sans)">AI marketplaces</text>
+      <text x="92" y="517" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#185FA5;font-family:var(--font-sans)">AWS Bedrock · Vertex AI</text>
+    </g>
+    <g class="node" onclick="show('search')">
+      <rect x="176" y="480" width="140" height="52" rx="8" fill="#E6F1FB" stroke="#378ADD" stroke-width="0.5"/>
+      <text x="246" y="501" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#042C53;font-family:var(--font-sans)">AI-native search</text>
+      <text x="246" y="517" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#185FA5;font-family:var(--font-sans)">Perplexity · SearchGPT</text>
+    </g>
+    <g class="node" onclick="show('os')">
+      <rect x="330" y="480" width="130" height="52" rx="8" fill="#E6F1FB" stroke="#378ADD" stroke-width="0.5"/>
+      <text x="395" y="501" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#042C53;font-family:var(--font-sans)">OS & platform AI</text>
+      <text x="395" y="517" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#185FA5;font-family:var(--font-sans)">Apple Intelligence · Copilot+</text>
+    </g>
+    <g class="node" onclick="show('robot')">
+      <rect x="476" y="480" width="130" height="52" rx="8" fill="#E6F1FB" stroke="#378ADD" stroke-width="0.5"/>
+      <text x="541" y="501" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#042C53;font-family:var(--font-sans)">Robotics & physical</text>
+      <text x="541" y="517" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#185FA5;font-family:var(--font-sans)">Figure · Tesla Bot</text>
+    </g>
+
+    <!-- LAYER 6: GOVERNANCE -->
+    <g class="node" onclick="show('safety')">
+      <rect x="22" y="586" width="140" height="52" rx="8" fill="#FAEEDA" stroke="#BA7517" stroke-width="0.5"/>
+      <text x="92" y="607" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#412402;font-family:var(--font-sans)">AI safety research</text>
+      <text x="92" y="623" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#854F0B;font-family:var(--font-sans)">ARC · Apollo Research</text>
+    </g>
+    <g class="node" onclick="show('policy')">
+      <rect x="176" y="586" width="140" height="52" rx="8" fill="#FAEEDA" stroke="#BA7517" stroke-width="0.5"/>
+      <text x="246" y="607" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#412402;font-family:var(--font-sans)">Policy & regulation</text>
+      <text x="246" y="623" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#854F0B;font-family:var(--font-sans)">EU AI Act · US EO · MAS</text>
+    </g>
+    <g class="node" onclick="show('audit')">
+      <rect x="330" y="586" width="140" height="52" rx="8" fill="#FAEEDA" stroke="#BA7517" stroke-width="0.5"/>
+      <text x="400" y="607" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#412402;font-family:var(--font-sans)">Audit & compliance</text>
+      <text x="400" y="623" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#854F0B;font-family:var(--font-sans)">Credo AI · KPMG AI</text>
+    </g>
+    <g class="node" onclick="show('ethics')">
+      <rect x="484" y="586" width="130" height="52" rx="8" fill="#FAEEDA" stroke="#BA7517" stroke-width="0.5"/>
+      <text x="549" y="607" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#412402;font-family:var(--font-sans)">Ethics & research</text>
+      <text x="549" y="623" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#854F0B;font-family:var(--font-sans)">AI Now · Partnership AI</text>
+    </g>
+
+    <!-- LAYER 7: DATA -->
+    <g class="node" onclick="show('synthetic')">
+      <rect x="22" y="690" width="140" height="52" rx="8" fill="#F1EFE8" stroke="#888780" stroke-width="0.5"/>
+      <text x="92" y="711" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#2C2C2A;font-family:var(--font-sans)">Synthetic data</text>
+      <text x="92" y="727" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#5F5E5A;font-family:var(--font-sans)">Scale AI · Gretel.ai</text>
+    </g>
+    <g class="node" onclick="show('labeling')">
+      <rect x="176" y="690" width="140" height="52" rx="8" fill="#F1EFE8" stroke="#888780" stroke-width="0.5"/>
+      <text x="246" y="711" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#2C2C2A;font-family:var(--font-sans)">Data labeling & RLHF</text>
+      <text x="246" y="727" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#5F5E5A;font-family:var(--font-sans)">Scale AI · Surge AI</text>
+    </g>
+    <g class="node" onclick="show('vector')">
+      <rect x="330" y="690" width="140" height="52" rx="8" fill="#F1EFE8" stroke="#888780" stroke-width="0.5"/>
+      <text x="400" y="711" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#2C2C2A;font-family:var(--font-sans)">Vector & RAG infra</text>
+      <text x="400" y="727" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#5F5E5A;font-family:var(--font-sans)">Pinecone · Weaviate</text>
+    </g>
+    <g class="node" onclick="show('knowledge')">
+      <rect x="484" y="690" width="130" height="52" rx="8" fill="#F1EFE8" stroke="#888780" stroke-width="0.5"/>
+      <text x="549" y="711" text-anchor="middle" dominant-baseline="central" style="font-size:12px;font-weight:500;fill:#2C2C2A;font-family:var(--font-sans)">Knowledge providers</text>
+      <text x="549" y="727" text-anchor="middle" dominant-baseline="central" style="font-size:10px;fill:#5F5E5A;font-family:var(--font-sans)">Common Crawl · Refinitiv</text>
+    </g>
+  </svg>
+
+  <div id="detail-panel" class="panel" style="display:none">
+    <button class="close-btn" onclick="hidepanel()">close</button>
+    <h3 id="dp-title"></h3>
+    <div class="role" id="dp-role"></div>
+    <div class="tags" id="dp-tags"></div>
+    <div class="examples" id="dp-examples"></div>
+  </div>
+
+  <p class="caption">Tap any node to explore · Arrows show value flow from compute to end-user · Saved from Claude.ai</p>
+</div>
+
+<script>
+const data = {
+  cloud:{title:"Cloud hyperscalers",color:"#7F77DD",tags:["B2B","B2C","Global infrastructure"],role:"The foundation of all AI workloads. Cloud providers supply the GPU clusters, storage, networking and managed AI services that power every model lab and application above them. They monetise through compute-hour billing and increasingly compete directly with model labs by bundling their own models.",examples:"AWS (Bedrock, SageMaker), Microsoft Azure (OpenAI partnership, Azure AI), Google Cloud (Vertex AI, TPU access), Oracle Cloud Infrastructure"},
+  chip:{title:"Chip designers",color:"#7F77DD",tags:["B2B","Hardware","Critical bottleneck"],role:"AI is a hardware race. GPUs (NVIDIA H100/H200) and TPUs (Google) are the physical substrate for training and inference. NVIDIA currently dominates with ~80% market share. Custom silicon (Apple's Neural Engine, Google TPU, Amazon Trainium) allows companies to optimise cost and latency for specific workloads.",examples:"NVIDIA (H100, H200, Blackwell), AMD (MI300X), Intel (Gaudi), Google (TPUs), Qualcomm (mobile NPUs), Apple (Neural Engine)"},
+  infra:{title:"AI infra specialists",color:"#7F77DD",tags:["B2B","GPU cloud","Niche compute"],role:"Pure-play GPU cloud providers that rent compute at lower cost than hyperscalers — often critical for startups and model labs that can't negotiate enterprise deals. They fill gaps that AWS/Azure/GCP leave, especially for burst workloads and bare-metal GPU access.",examples:"CoreWeave, Lambda Labs, Vast.ai, Together AI, Replicate, Paperspace"},
+  edge:{title:"Edge & on-device AI",color:"#7F77DD",tags:["Consumer","B2B","Privacy-first"],role:"Running AI inference locally on a device — phone, laptop, car — rather than in the cloud. Eliminates latency and network dependency, enables offline use, and preserves privacy (data never leaves the device). Requires model compression techniques like quantisation and distillation.",examples:"Apple (Neural Engine, on-device Siri, Private Cloud Compute), Qualcomm (Snapdragon AI), Samsung (Galaxy AI), Meta (llama.cpp for local inference)"},
+  frontier:{title:"Frontier model labs",color:"#1D9E75",tags:["B2B","B2C","Research-led"],role:"Organisations that train the largest, most capable AI models from scratch using massive compute and proprietary datasets. They sit at the centre of the ecosystem — selling API access to developers, partnering with cloud providers, and directly competing with consumer products. Training costs can exceed $100M per run.",examples:"Anthropic (Claude), OpenAI (GPT-4o), Google DeepMind (Gemini), xAI (Grok), Mistral, Cohere"},
+  open:{title:"Open-source model labs",color:"#1D9E75",tags:["Developer","Community","Disruption"],role:"Release model weights publicly so anyone can download, fine-tune, and self-host. Open-source models commoditise AI capabilities and enable customisation without API dependency. Commercial closed labs must race to stay meaningfully ahead.",examples:"Meta (Llama 3), Mistral AI, DeepSeek, Stability AI, Allen Institute (OLMo), Technology Innovation Institute (Falcon)"},
+  multimodal:{title:"Specialised & multimodal models",color:"#1D9E75",tags:["B2B","B2C","Domain-specific"],role:"Models purpose-built for a specific modality (audio, image, video, code) or domain (biology, law, finance). They often outperform general models on their target tasks at lower cost. The ecosystem is increasingly a constellation of specialists orchestrated by general models.",examples:"ElevenLabs (voice), Midjourney / Stable Diffusion (image), Runway (video), AlphaFold (protein folding), StarCoder (code), Whisper (speech-to-text)"},
+  embed:{title:"Embedding & vector search",color:"#1D9E75",tags:["Developer","RAG","Infrastructure"],role:"Embedding models convert text, images, or code into numerical vectors that capture semantic meaning. Combined with vector databases, they power Retrieval-Augmented Generation (RAG) — letting you give an LLM access to your private data without re-training.",examples:"Cohere (Embed), OpenAI (text-embedding-3), Pinecone (vector DB), Weaviate, Qdrant, Chroma"},
+  api:{title:"API & SDK layers",color:"#E8593C",tags:["Developer","B2B","Access layer"],role:"The programmatic interface through which developers access AI model capabilities. Abstracts away model complexity into simple HTTP calls. API design (streaming, function calling, tool use, prompt caching) determines what products can be built.",examples:"Anthropic API (Claude), OpenAI API, Google Gemini API, Hugging Face Inference API, Replicate API"},
+  mlops:{title:"MLOps & training infrastructure",color:"#E8593C",tags:["Developer","B2B","Production ML"],role:"The tooling for training, tracking, evaluating, and deploying models in production. Covers experiment tracking, fine-tuning infrastructure, model registries, and serverless deployment.",examples:"Weights & Biases (experiment tracking), Modal (serverless GPU), Hugging Face (model hub + training), Vertex AI Pipelines, MLflow, DVC"},
+  agent:{title:"Agent frameworks & orchestration",color:"#E8593C",tags:["Developer","Automation","Multi-agent"],role:"Libraries and frameworks for building AI agents — systems where an LLM can use tools, make decisions, and take multi-step actions autonomously. Handles prompt chaining, memory management, tool calling, and multi-agent coordination.",examples:"LangChain, LlamaIndex, CrewAI, AutoGen (Microsoft), LangGraph, Claude Computer Use, OpenAI Assistants API"},
+  eval:{title:"Evaluation & observability",color:"#E8593C",tags:["Developer","Quality","Production"],role:"Tooling for testing whether AI outputs are accurate, safe, and consistent. Covers unit-style LLM evals, regression testing across model versions, prompt monitoring in production, and cost/latency tracking.",examples:"Braintrust, Helicone, LangSmith, PromptLayer, Evidently AI, RAGAS (RAG evaluation)"},
+  copilot:{title:"Coding assistants",color:"#D4537E",tags:["Developer","B2C","Productivity"],role:"AI tools embedded in the software development lifecycle. Autocomplete, code generation, bug fixing, test writing, and codebase chat. These are both applications of AI AND major distribution channels for underlying models.",examples:"GitHub Copilot, Cursor, Windsurf, Replit AI, Amazon CodeWhisperer, JetBrains AI, Tabnine"},
+  biz:{title:"Business AI tools (horizontal)",color:"#D4537E",tags:["B2B","SaaS","Productivity"],role:"AI features embedded in existing business software — CRM, productivity, HR, finance. Typically powered by frontier models via API, not trained from scratch. The business value is the workflow integration, not the model itself.",examples:"Notion AI, HubSpot AI, Salesforce Einstein, Microsoft Copilot for M365, Slack AI, Zoom AI Companion, Grammarly"},
+  vert:{title:"Vertical AI applications",color:"#D4537E",tags:["B2B","Domain-specific","High-value"],role:"AI products purpose-built for a specific industry — law, healthcare, finance, education. They combine a fine-tuned or prompted model with deep domain workflows, proprietary data, and regulatory compliance. Often command premium pricing because they replace specialist human labour.",examples:"Harvey (legal), Abridge (medical notes), Aidoc (radiology), Kensho (financial analytics), Duolingo Max (education), Runway (media)"},
+  consumer:{title:"Consumer AI apps",color:"#D4537E",tags:["B2C","Mass market","Network effects"],role:"AI products targeted at individual consumers. Combine powerful underlying models with consumer UX, distribution, and brand. Compete on ease of use, personality, and breadth of capability.",examples:"ChatGPT, Claude.ai, Google Gemini, Perplexity, Character.ai, Midjourney (Discord), Pi by Inflection"},
+  mktplace:{title:"AI model marketplaces",color:"#378ADD",tags:["B2B","Multi-model","One-stop"],role:"Managed platforms that provide unified API access to multiple AI models — letting developers switch models, compare costs, and add guardrails without dealing with each lab directly.",examples:"AWS Bedrock (includes Claude), Google Vertex AI, Azure AI Studio, Hugging Face Inference Endpoints, Together AI, Fireworks AI"},
+  search:{title:"AI-native search",color:"#378ADD",tags:["B2C","B2B","Disruption"],role:"Search engines rebuilt around LLMs — answering questions with synthesised responses rather than ranked links. Threatens the traditional search/advertising business model.",examples:"Perplexity AI, ChatGPT Search, Google AI Overviews, You.com, Bing Copilot, Exa (developer search API)"},
+  os:{title:"OS & platform AI",color:"#378ADD",tags:["Consumer","B2B","Platform control"],role:"AI built into operating systems, browsers, and mobile platforms — giving AI capabilities to every app and user without them needing to seek out AI products. Controls the distribution and data of billions of devices.",examples:"Apple Intelligence (iOS/macOS), Microsoft Copilot+ (Windows), Google Gemini Nano (Android), Samsung Galaxy AI, Meta AI (WhatsApp/Instagram)"},
+  robot:{title:"Robotics & physical AI",color:"#378ADD",tags:["Hardware","B2B","Long-horizon"],role:"Applying AI to physical systems — robots, autonomous vehicles, drones. Requires combining vision models, language understanding, and physical control. Still early-stage but considered a major frontier.",examples:"Figure AI, Physical Intelligence (pi), Tesla Bot (Optimus), Boston Dynamics, Waymo, Mobileye, Apptronik"},
+  safety:{title:"AI safety research",color:"#BA7517",tags:["Research","Non-profit","Critical"],role:"Organisations focused on understanding and mitigating risks from advanced AI systems. This includes alignment research, interpretability (understanding what's happening inside models), and red-teaming (finding failure modes).",examples:"ARC Evals (now METR), Apollo Research, Redwood Research, Center for AI Safety, UK AI Safety Institute, Anthropic's alignment team"},
+  policy:{title:"Policy & regulation",color:"#BA7517",tags:["Government","Global","Compliance"],role:"Governments and intergovernmental bodies setting the rules of the road for AI. Regulation shapes what products can be built, how data can be used, and who bears liability. MAS's AI governance framework and the EU AI Act are both relevant to fintech in Singapore.",examples:"EU AI Act, US Executive Orders on AI, MAS AI Governance Framework (Singapore), UK AI Safety Institute, China's AI regulations, G7 Hiroshima Process"},
+  audit:{title:"AI audit & compliance tools",color:"#BA7517",tags:["B2B","Enterprise","Trust"],role:"Tools and services that help organisations demonstrate their AI systems are fair, explainable, and compliant. Increasingly required by regulators and enterprise procurement.",examples:"Credo AI, Arthur AI, Fiddler AI, IBM OpenScale, KPMG Trusted AI, Deloitte AI Risk"},
+  ethics:{title:"AI ethics & civil society",color:"#BA7517",tags:["Research","Advocacy","Public interest"],role:"Independent research organisations, academics, and advocacy groups that study AI's societal impact — bias, labour displacement, surveillance, environmental cost. They shape public discourse and influence regulation.",examples:"AI Now Institute, Partnership on AI, Algorithmic Justice League, Data & Society, Future of Life Institute"},
+  synthetic:{title:"Synthetic data companies",color:"#888780",tags:["B2B","Training data","Privacy"],role:"Organisations that generate artificial training data when real data is scarce, sensitive, or expensive to label. Critical for privacy-sensitive domains (healthcare, finance) and rare scenarios.",examples:"Scale AI (synthetic data arm), Gretel.ai, Tonic.ai, Mostly AI, YData, DataRobot"},
+  labeling:{title:"Data labeling & RLHF",color:"#888780",tags:["B2B","Human-in-loop","Quality"],role:"Human annotation of training data — the labour-intensive process of teaching models what good outputs look like. RLHF (Reinforcement Learning from Human Feedback) is how Claude and ChatGPT learned to be helpful and safe.",examples:"Scale AI, Surge AI, Appen, Toloka (Yandex), Mechanical Turk, Remotasks, Labelbox"},
+  vector:{title:"Vector databases & RAG infrastructure",color:"#888780",tags:["Developer","B2B","Search"],role:"Databases optimised for storing and searching vector embeddings. The core infrastructure for RAG systems that let LLMs access private or real-time data without retraining.",examples:"Pinecone, Weaviate, Chroma, Qdrant, Milvus, pgvector (Postgres extension), Supabase Vector"},
+  knowledge:{title:"Knowledge & data providers",color:"#888780",tags:["B2B","Training","Proprietary data"],role:"Organisations that provide the raw data used to train foundation models — web crawls, licensed text, financial data, scientific literature. Proprietary data deals are increasingly a competitive moat.",examples:"Common Crawl (web data), Refinitiv / Bloomberg (financial), PubMed (biomedical), The Pile, C4 dataset, Shutterstock (licensed images)"}
+};
+
+let current = null;
+function show(id){
+  const d = data[id];
+  if(!d) return;
+  current = id;
+  document.getElementById('dp-title').textContent = d.title;
+  document.getElementById('dp-role').textContent = d.role;
+  const tags = document.getElementById('dp-tags');
+  tags.innerHTML = d.tags.map(t=>`<span class="tag" style="background:${d.color}22;color:${d.color};border:0.5px solid ${d.color}66">${t}</span>`).join('');
+  document.getElementById('dp-examples').innerHTML = `<strong>Key players:</strong> ${d.examples}`;
+  document.getElementById('detail-panel').style.display='block';
+  document.getElementById('detail-panel').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function hidepanel(){document.getElementById('detail-panel').style.display='none';}
+</script>
+</body>
+</html>
