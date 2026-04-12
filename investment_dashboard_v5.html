@@ -1,0 +1,1299 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0f14;--bg2:#13161d;--bg3:#1a1e28;--bg4:#222635;
+  --border:#2a2f3d;--border2:#333849;
+  --text:#e8eaf0;--text2:#9aa0b4;--text3:#5c6278;
+  --green:#00c87a;--green-dim:#0a3d28;
+  --red:#ff4d4d;--red-dim:#3d0f0f;
+  --amber:#f5a623;--amber-dim:#3d2a07;
+  --blue:#4a9eff;--blue-dim:#0d2240;
+  --purple:#9b7fe8;--purple-dim:#1e1535;
+  --r:6px;--rl:10px;
+  --analysis-font:'Manrope','IBM Plex Sans',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:13px}
+.dash{padding:20px}
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;padding-bottom:14px;border-bottom:0.5px solid var(--border)}
+.logo{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:500;letter-spacing:0.04em}
+.logo span{color:var(--green)}
+.open-ts{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);margin-top:4px}
+.tabs{display:flex;gap:1px;margin-bottom:18px;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:3px;width:fit-content}
+.tab{font-size:11px;font-weight:500;padding:6px 16px;cursor:pointer;color:var(--text2);border-radius:4px;background:transparent;border:none;font-family:'IBM Plex Sans',sans-serif;letter-spacing:0.02em;transition:all 0.15s}
+.tab.active{background:var(--bg4);color:var(--text)}
+.tab:hover:not(.active){color:var(--text)}
+.panel{display:none}.panel.active{display:block}
+.ts-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.ts-chip{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);background:var(--bg2);border:0.5px solid var(--border);padding:3px 8px;border-radius:3px}
+.sl{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px}
+.metrics-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.mc{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:12px 14px}
+.ml{font-size:10px;color:var(--text3);margin-bottom:5px;font-family:'IBM Plex Mono',monospace;letter-spacing:0.05em;text-transform:uppercase}
+.mv{font-size:20px;font-weight:500;color:var(--text);line-height:1;font-family:'IBM Plex Mono',monospace}
+.ms{font-size:10px;margin-top:4px;font-family:'IBM Plex Mono',monospace}
+.pos{color:var(--green)}.neg{color:var(--red)}.neu{color:var(--text2)}
+.period-btns{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.pb{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:4px 10px;border:0.5px solid var(--border2);border-radius:3px;background:transparent;color:var(--text2);cursor:pointer}
+.pb.active{border-color:var(--green);color:var(--green);background:var(--green-dim)}
+.pb:hover:not(.active){color:var(--text)}
+.chart-box{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rl);padding:14px 16px;margin-bottom:12px}
+.overview-top-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:10px;margin-bottom:12px;align-items:stretch}
+.chart-box.tight{margin-bottom:0}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.chart-toggle{display:flex;gap:3px}
+.ct-btn{font-family:'IBM Plex Mono',monospace;font-size:9px;padding:3px 8px;border:0.5px solid var(--border2);border-radius:3px;background:transparent;color:var(--text3);cursor:pointer}
+.ct-btn.active{border-color:var(--blue);color:var(--blue);background:var(--blue-dim)}
+canvas{display:block}
+.verdict-block{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rl);padding:16px 18px;margin-bottom:12px;border-left:2px solid var(--green)}
+.verdict-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px}
+.vt{font-size:12px;color:var(--text2);line-height:1.72;margin-bottom:8px;font-family:var(--analysis-font);letter-spacing:0.01em}
+.vt:last-child{margin-bottom:0}
+.hl{color:var(--text);font-weight:500}.hlg{color:var(--green);font-weight:500}.hlr{color:var(--red);font-weight:500}.hla{color:var(--amber);font-weight:500}
+.dr{display:flex;align-items:baseline;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border)}
+.dr:last-child{border-bottom:none}
+.dt{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;color:var(--text);min-width:48px}
+.dc{font-family:'IBM Plex Mono',monospace;font-size:11px;min-width:56px}
+.dw{font-size:11px;color:var(--text2);line-height:1.5;font-family:var(--analysis-font);letter-spacing:0.01em}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.panel-box{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rl);padding:14px 16px}
+.br{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--border)}
+.br:last-child{border-bottom:none}
+.bn{font-size:11px;color:var(--text2);min-width:90px;font-family:'IBM Plex Mono',monospace}
+.bv{font-size:12px;font-weight:500;min-width:48px;font-family:'IBM Plex Mono',monospace}
+.bb{flex:1;height:4px;background:var(--bg4);border-radius:2px}
+.bf{height:100%;border-radius:2px}
+.bd{font-size:10px;min-width:68px;text-align:right;font-family:'IBM Plex Mono',monospace;color:var(--text3)}
+.stock-perf-table{width:100%;border-collapse:collapse;table-layout:fixed}
+.stock-perf-table th{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);font-weight:400;text-align:left;padding:6px 7px;border-bottom:0.5px solid var(--border);letter-spacing:0.06em;text-transform:uppercase}
+.stock-perf-table td{padding:8px 7px;border-bottom:0.5px solid var(--border);font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text2)}
+.stock-perf-table td.pos{color:var(--green)}
+.stock-perf-table td.neg{color:var(--red)}
+.stock-perf-table td.neu{color:var(--text2)}
+.stock-perf-table td:first-child{color:var(--text);font-weight:500}
+.stock-perf-table tr:last-child td{border-bottom:none}
+.stock-perf-table tr:hover td{background:var(--bg3)}
+.spark-cell{width:120px}
+.spark-canvas{width:110px;height:26px;display:block}
+.htable{width:100%;border-collapse:collapse;table-layout:fixed}
+.htable th{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);font-weight:400;text-align:left;padding:6px 8px;border-bottom:0.5px solid var(--border);letter-spacing:0.07em;text-transform:uppercase}
+.htable td{padding:10px 8px;border-bottom:0.5px solid var(--border);font-size:11px}
+.htable tr:last-child td{border-bottom:none}
+.htable tr:hover td{background:var(--bg3)}
+.h-ticker{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;color:var(--text)}
+.h-name{font-size:10px;color:var(--text3);margin-top:2px}
+.sb{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;padding:3px 7px;border-radius:3px;white-space:nowrap}
+.sig-buy{background:var(--green-dim);color:var(--green);border:0.5px solid var(--green)}
+.sig-hold{background:var(--blue-dim);color:var(--blue);border:0.5px solid var(--blue)}
+.sig-trim{background:var(--amber-dim);color:var(--amber);border:0.5px solid var(--amber)}
+.sig-watch{background:var(--red-dim);color:var(--red);border:0.5px solid var(--red)}
+.free-tag{font-family:'IBM Plex Mono',monospace;font-size:8px;padding:2px 5px;border-radius:2px;background:var(--green-dim);color:var(--green);border:0.5px solid var(--green);margin-left:4px}
+.macro-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.macro-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:10px 12px}
+.macro-card-tall-right{grid-column:3;grid-row:1 / span 2}
+.macro-label{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px}
+.macro-val{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;color:var(--text)}
+.macro-sub{font-size:10px;color:var(--text2);margin-top:3px;line-height:1.5;font-family:var(--analysis-font)}
+.event-summary{font-size:10px;color:var(--text2);line-height:1.58;margin-top:4px;margin-bottom:7px;font-family:var(--analysis-font)}
+.event-stack{display:grid;gap:6px}
+.event-box{background:var(--bg3);border:0.5px solid var(--border2);border-radius:6px;padding:7px 8px}
+.event-head{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--amber);margin-bottom:3px;letter-spacing:0.04em}
+.event-body{font-size:10px;color:var(--text2);line-height:1.5;font-family:var(--analysis-font)}
+.deep-btn{font-family:'IBM Plex Mono',monospace;font-size:9px;padding:4px 8px;border-radius:3px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;margin-top:6px}
+.deep-btn:hover{border-color:var(--blue);color:var(--blue)}
+.deep-report{background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--r);padding:12px 14px}
+.deep-title{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px}
+.deep-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.deep-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;padding:8px 9px}
+.deep-head{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:4px}
+.deep-body{font-size:10px;color:var(--text2);line-height:1.58;font-family:var(--analysis-font)}
+.sdeep-wrap{display:grid;gap:8px}
+.sdeep-stock{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);overflow:hidden}
+.sdeep-stock-head{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;border-bottom:0.5px solid var(--border);background:var(--bg3)}
+.sdeep-stock-title{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text);letter-spacing:0.04em}
+.sdeep-stock-sub{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3)}
+.sdeep-row{display:grid;grid-template-columns:20px 1fr;gap:8px;padding:9px 11px;border-top:0.5px solid var(--border)}
+.sdeep-num{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--blue)}
+.sdeep-row-title{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:3px}
+.sdeep-row-body{font-size:11px;color:var(--text2);line-height:1.62;font-family:var(--analysis-font)}
+.pareto-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);margin-bottom:12px}
+.pareto-left{display:flex;align-items:center;gap:10px}
+.pareto-title{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;color:var(--text)}
+.pareto-sub{font-size:11px;color:var(--text3)}
+.toggle-wrap{display:flex;align-items:center;gap:8px}
+.toggle-track{position:relative;width:36px;height:20px;background:var(--bg4);border:0.5px solid var(--border2);border-radius:10px;cursor:pointer;transition:background 0.2s}
+.toggle-track.on{background:var(--green-dim);border-color:var(--green)}
+.toggle-knob{position:absolute;top:2px;left:2px;width:16px;height:16px;background:var(--text3);border-radius:50%;transition:all 0.2s}
+.toggle-track.on .toggle-knob{left:18px;background:var(--green)}
+.toggle-label{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3)}
+.toggle-track.on+.toggle-label{color:var(--green)}
+.pareto-panel{display:none;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:12px}
+.pareto-panel.visible{display:block}
+.lever-card{background:var(--bg2);border:0.5px solid var(--amber);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;border-left:2px solid var(--amber)}
+.lever-label{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--amber);letter-spacing:0.1em;margin-bottom:5px}
+.lever-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
+.lever-text{font-size:11px;color:var(--text2);line-height:1.67;font-family:var(--analysis-font);letter-spacing:0.01em}
+.impact-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--border)}
+.impact-row:last-child{border-bottom:none}
+.impact-rank{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);min-width:20px}
+.impact-action{font-size:11px;color:var(--text);flex:1;font-family:var(--analysis-font);letter-spacing:0.01em}
+.impact-badge{font-family:'IBM Plex Mono',monospace;font-size:9px;padding:2px 7px;border-radius:3px}
+.triggered-stocks{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.trig-pill{font-family:'IBM Plex Mono',monospace;font-size:9px;padding:3px 8px;border-radius:3px;background:var(--amber-dim);color:var(--amber);border:0.5px solid var(--amber)}
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.action-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rl);padding:14px 16px}
+.action-card.green{border-left:2px solid var(--green)}
+.action-card.amber{border-left:2px solid var(--amber)}
+.action-card.blue{border-left:2px solid var(--blue)}
+.action-card.purple{border-left:2px solid var(--purple)}
+.action-label{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px}
+.action-label.green{color:var(--green)}.action-label.amber{color:var(--amber)}.action-label.blue{color:var(--blue)}.action-label.purple{color:var(--purple)}
+.action-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:8px;line-height:1.35;font-family:var(--analysis-font);letter-spacing:0.01em}
+.action-text{font-size:11px;color:var(--text2);line-height:1.67;margin-bottom:10px;font-family:var(--analysis-font);letter-spacing:0.01em}
+.action-btns{display:flex;gap:6px;flex-wrap:wrap}
+.abtn{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:4px 10px;border-radius:3px;cursor:pointer;border:none}
+.abtn-sell{background:var(--red-dim);color:var(--red)}.abtn-buy{background:var(--green-dim);color:var(--green)}.abtn-hold{background:var(--blue-dim);color:var(--blue)}.abtn-watch{background:var(--amber-dim);color:var(--amber)}
+.conviction-table{width:100%;border-collapse:collapse;table-layout:fixed}
+.conviction-table th{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);font-weight:400;text-align:left;padding:6px 8px;border-bottom:0.5px solid var(--border);letter-spacing:0.07em;text-transform:uppercase}
+.conviction-table td{padding:11px 8px;border-bottom:0.5px solid var(--border);font-size:11px;color:var(--text2);line-height:1.58}
+.htable td:last-child,.conviction-table td:nth-child(3),.target-table td:last-child{font-family:var(--analysis-font);letter-spacing:0.01em}
+.conviction-table tr:last-child td{border-bottom:none}
+.rr-badge{font-family:'IBM Plex Mono',monospace;font-size:9px;padding:3px 8px;border-radius:3px;font-weight:500}
+.rr-exc{background:var(--green-dim);color:var(--green);border:0.5px solid var(--green)}
+.rr-str{background:var(--blue-dim);color:var(--blue);border:0.5px solid var(--blue)}
+.proj-block{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rl);padding:14px 16px;margin-bottom:10px}
+.proj-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.target-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.target-card{background:var(--bg3);border-radius:4px;padding:8px 10px;text-align:center}
+.target-case{font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:3px;letter-spacing:0.05em}
+.target-price{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500}
+.target-table{width:100%;border-collapse:collapse;table-layout:fixed}
+.target-table th{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);font-weight:400;text-align:left;padding:6px 8px;border-bottom:0.5px solid var(--border);letter-spacing:0.07em;text-transform:uppercase}
+.target-table td{padding:9px 8px;border-bottom:0.5px solid var(--border);font-size:11px;color:var(--text2);line-height:1.55}
+.target-table tr:last-child td{border-bottom:none}
+.target-table tr:hover td{background:var(--bg3)}
+.refresh-btn{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:5px 12px;border:0.5px solid var(--border2);border-radius:3px;background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:4px}
+.refresh-btn:hover{border-color:var(--green);color:var(--green)}
+.refresh-btn.free{border-color:var(--green);color:var(--green);background:var(--green-dim)}
+.refresh-btn.free:hover{border-color:var(--green);color:var(--green)}
+.refresh-btn.pareto{border-color:var(--blue);color:var(--blue);background:var(--blue-dim)}
+.refresh-btn.pareto:hover{border-color:var(--blue);color:var(--blue)}
+.mode-select{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  padding:5px 26px 5px 8px;border:0.5px solid var(--border2);border-radius:3px;
+  background:var(--bg2);color:var(--text2);height:28px;
+}
+.mode-select:focus{outline:none;border-color:var(--blue);color:var(--text)}
+.refresh-guide{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);margin-bottom:10px}
+.confirm-bar{display:none;background:var(--bg3);border:0.5px solid var(--amber);border-radius:var(--r);padding:9px 13px;margin-bottom:10px;font-size:11px;color:var(--text2)}
+.agent-badge{font-family:'IBM Plex Mono',monospace;font-size:9px;padding:2px 7px;border-radius:3px;background:var(--bg4);border:0.5px solid var(--border2);color:var(--text3)}
+.visa-block{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rl);padding:12px 14px;margin-bottom:12px;border-left:2px solid var(--blue)}
+.visa-label{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--blue);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px}
+.form-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:10px;align-items:end}
+.form-label{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);margin-bottom:4px;letter-spacing:0.06em;text-transform:uppercase}
+.form-input{width:100%;font-size:12px;font-family:'IBM Plex Mono',monospace;padding:7px 10px;border:0.5px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text)}
+.form-input:focus{outline:none;border-color:var(--green)}
+.add-btn{font-family:'IBM Plex Mono',monospace;font-size:11px;padding:7px 14px;border:0.5px solid var(--green);border-radius:var(--r);background:var(--green-dim);color:var(--green);cursor:pointer}
+.trade-table{width:100%;border-collapse:collapse;table-layout:fixed}
+.trade-table th{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);font-weight:400;text-align:left;padding:6px 8px;border-bottom:0.5px solid var(--border);letter-spacing:0.07em;text-transform:uppercase}
+.trade-table td{padding:8px;border-bottom:0.5px solid var(--border);font-size:11px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'IBM Plex Mono',monospace}
+.trade-table td:first-child{color:var(--text);font-weight:500}
+.trade-table tr:last-child td{border-bottom:none}
+.type-badge{font-family:'IBM Plex Mono',monospace;font-size:9px;padding:2px 6px;border-radius:3px}
+.buy-b{background:var(--green-dim);color:var(--green)}.sell-b{background:var(--red-dim);color:var(--red)}
+.del-btn{font-size:10px;color:var(--red);cursor:pointer;background:none;border:none;font-family:'IBM Plex Mono',monospace;opacity:0.6}
+.del-btn:hover{opacity:1}
+.cost-bar{display:flex;gap:14px;flex-wrap:wrap;align-items:center;padding:10px 0;border-top:0.5px solid var(--border);margin-top:16px}
+.cost-item{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3)}
+.cost-val{color:var(--text2)}
+.cache-note{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);margin-top:5px}
+.chart-float-tooltip{
+  position:fixed;z-index:9999;pointer-events:none;
+  background:#1a1e28;border:0.5px solid #2a2f3d;border-radius:4px;
+  color:var(--text);padding:6px 8px;transform:translate(-50%,-110%);
+  font-family:'IBM Plex Mono',monospace;font-size:10px;white-space:nowrap;
+  opacity:0;transition:opacity 0.08s ease;
+}
+@media (max-width:980px){
+  .overview-top-grid{grid-template-columns:1fr}
+  .macro-card-tall-right{grid-column:span 1;grid-row:auto}
+  .deep-grid{grid-template-columns:1fr}
+  .form-row{grid-template-columns:1fr 1fr}
+}
+</style>
+
+<div class="dash">
+  <div class="topbar">
+    <div>
+      <div class="logo">PORT<span>_</span>FOLIO</div>
+      <div class="open-ts" id="open-ts">Initialising...</div>
+    </div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);text-align:right" id="nav-ts"></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('overview',this)">Overview</button>
+    <button class="tab" onclick="switchTab('intelligence',this)">Intelligence</button>
+    <button class="tab" onclick="switchTab('strategy',this)">Strategy</button>
+    <button class="tab" onclick="switchTab('trades',this)">My Trades</button>
+  </div>
+
+  <!-- ══ OVERVIEW ══ -->
+  <div id="tab-overview" class="panel active">
+    <div class="ts-row">
+      <div class="sl">Performance snapshot</div>
+      <span class="ts-chip" id="ts-overview">—</span>
+    </div>
+
+    <div class="metrics-row">
+      <div class="mc"><div class="ml">Portfolio value</div><div class="mv">S$48,210</div><div class="ms pos">↑ S$1,340 today</div></div>
+      <div class="mc">
+        <div class="ml">Day P&L</div>
+        <div class="mv pos" id="m-pl">+2.86%</div>
+        <div class="ms pos" id="m-pl-sub">vs SPY +0.42%</div>
+      </div>
+      <div class="mc">
+        <div class="ml">Total return</div>
+        <div style="display:flex;align-items:baseline;gap:8px">
+          <div class="mv pos" id="m-ret">+18.3%</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3)" id="m-avg-ret">avg +1.5%/mo</div>
+        </div>
+        <div class="ms neu" id="m-ret-label">since first trade</div>
+      </div>
+      <div class="mc"><div class="ml">Beta</div><div class="mv">1.24</div><div class="ms neu">vs market 1.0</div></div>
+      <div class="mc"><div class="ml">Wtd. fwd P/E</div><div class="mv" style="color:var(--green)">22.1x</div><div class="ms neu">blended portfolio</div></div>
+    </div>
+
+    <div class="period-btns">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);margin-right:4px">Period:</span>
+      <button class="pb active" onclick="setPeriod('1D',this)">1D</button>
+      <button class="pb" onclick="setPeriod('1W',this)">1W</button>
+      <button class="pb" onclick="setPeriod('MTD',this)">MTD</button>
+      <button class="pb" onclick="setPeriod('YTD',this)">YTD</button>
+      <button class="pb" onclick="setPeriod('1Y',this)">1Y</button>
+      <button class="pb" onclick="setPeriod('3Y',this)">3Y</button>
+      <button class="pb" onclick="setPeriod('ALL',this)">ALL</button>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);margin-left:6px">free · yfinance</span>
+    </div>
+
+    <div class="overview-top-grid">
+      <div class="chart-box tight">
+        <div class="chart-header">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text2)" id="chart-period-label">Portfolio vs benchmarks · 1 day</div>
+          <div class="chart-toggle">
+            <button class="ct-btn active" onclick="setChartMode('pct',this)">% return</button>
+            <button class="ct-btn" onclick="setChartMode('abs',this)">S$ value</button>
+          </div>
+        </div>
+        <canvas id="perfChart" height="140"></canvas>
+        <div style="display:flex;gap:14px;margin-top:8px">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--green)">— Portfolio</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--blue)">— QQQ</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3)">— SPY</span>
+        </div>
+      </div>
+
+      <div class="panel-box" style="margin-bottom:0">
+        <div class="sl" style="margin-bottom:10px">Allocation</div>
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+          <svg width="90" height="90" viewBox="0 0 90 90">
+            <circle class="alloc-seg" data-label="NVDA" data-value="18,300" data-weight="38%" cx="45" cy="45" r="30" fill="none" stroke="#378ADD" stroke-width="14" stroke-dasharray="71.6 118.0" stroke-dashoffset="0" transform="rotate(-90 45 45)"></circle>
+            <circle class="alloc-seg" data-label="AAPL" data-value="10,600" data-weight="22%" cx="45" cy="45" r="30" fill="none" stroke="#00c87a" stroke-width="14" stroke-dasharray="41.5 148.1" stroke-dashoffset="-71.6" transform="rotate(-90 45 45)"></circle>
+            <circle class="alloc-seg" data-label="V" data-value="8,670" data-weight="18%" cx="45" cy="45" r="30" fill="none" stroke="#f5a623" stroke-width="14" stroke-dasharray="33.9 155.7" stroke-dashoffset="-113.1" transform="rotate(-90 45 45)"></circle>
+            <circle class="alloc-seg" data-label="TSLA" data-value="5,780" data-weight="12%" cx="45" cy="45" r="30" fill="none" stroke="#ff4d4d" stroke-width="14" stroke-dasharray="22.6 167.0" stroke-dashoffset="-147.0" transform="rotate(-90 45 45)"></circle>
+            <circle class="alloc-seg" data-label="BRK.B" data-value="4,820" data-weight="10%" cx="45" cy="45" r="30" fill="none" stroke="#5c6278" stroke-width="14" stroke-dasharray="18.8 170.8" stroke-dashoffset="-169.6" transform="rotate(-90 45 45)"></circle>
+            <text x="45" y="42" text-anchor="middle" style="font-size:11px;font-weight:500;fill:#e8eaf0;font-family:'IBM Plex Mono',monospace">5</text>
+            <text x="45" y="54" text-anchor="middle" style="font-size:8px;fill:#9aa0b4;font-family:'IBM Plex Mono',monospace">stocks</text>
+          </svg>
+          <div style="display:grid;grid-template-columns:1fr;gap:4px;font-size:10px;min-width:120px">
+            <div style="display:flex;align-items:center;gap:5px;color:var(--text2)"><div style="width:7px;height:7px;border-radius:50%;background:#378ADD;flex-shrink:0"></div>NVDA 38%</div>
+            <div style="display:flex;align-items:center;gap:5px;color:var(--text2)"><div style="width:7px;height:7px;border-radius:50%;background:#00c87a;flex-shrink:0"></div>AAPL 22%</div>
+            <div style="display:flex;align-items:center;gap:5px;color:var(--text2)"><div style="width:7px;height:7px;border-radius:50%;background:#f5a623;flex-shrink:0"></div>V 18%</div>
+            <div style="display:flex;align-items:center;gap:5px;color:var(--text2)"><div style="width:7px;height:7px;border-radius:50%;background:#ff4d4d;flex-shrink:0"></div>TSLA 12%</div>
+            <div style="display:flex;align-items:center;gap:5px;color:var(--text2)"><div style="width:7px;height:7px;border-radius:50%;background:#5c6278;flex-shrink:0"></div>BRK.B 10%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-box" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div class="sl" style="margin:0">Holdings — ranked by weight</div>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3)" id="stock-period-lbl">1D chg</span>
+      </div>
+      <table class="stock-perf-table">
+        <thead><tr>
+          <th style="width:58px">Ticker</th>
+          <th style="width:52px">Weight</th>
+          <th style="width:72px">Price</th>
+          <th style="width:64px" id="chg-header">Perf</th>
+          <th style="width:76px">Avg cost</th>
+          <th style="width:48px">P/E</th>
+          <th class="spark-cell">Trend</th>
+        </tr></thead>
+        <tbody id="stock-perf-tbody">
+          <tr><td>NVDA</td><td class="neu">38%</td><td>$886.40</td><td class="pos" id="sp-nvda">+4.2%</td><td class="neu">$740.00</td><td class="neu">52.1</td><td><canvas id="spark-nvda" class="spark-canvas"></canvas></td></tr>
+          <tr><td>AAPL</td><td class="neu">22%</td><td>$182.60</td><td class="neg" id="sp-aapl">−0.8%</td><td class="neu">$165.00</td><td class="neu">29.4</td><td><canvas id="spark-aapl" class="spark-canvas"></canvas></td></tr>
+          <tr><td>V</td><td class="neu">18%</td><td>$271.10</td><td class="pos" id="sp-v">+1.1%</td><td class="neu">$250.00</td><td class="neu">31.2</td><td><canvas id="spark-v" class="spark-canvas"></canvas></td></tr>
+          <tr><td>TSLA</td><td class="neu">12%</td><td>$175.20</td><td class="neg" id="sp-tsla">−2.1%</td><td class="neu">$210.00</td><td class="neg">68.3</td><td><canvas id="spark-tsla" class="spark-canvas"></canvas></td></tr>
+          <tr><td>BRK.B</td><td class="neu">10%</td><td>$393.80</td><td class="pos" id="sp-brkb">+0.3%</td><td class="neu">$370.00</td><td class="neu">21.4</td><td><canvas id="spark-brkb" class="spark-canvas"></canvas></td></tr>
+        </tbody>
+      </table>
+      <div class="cache-note" style="margin-top:6px">Sources: yfinance price history and quote snapshots · free · performance + mini sparkline supports hover for exact price</div>
+    </div>
+
+    <!-- Diagnostics -->
+    <div class="verdict-block">
+      <div class="verdict-title">Performance diagnostics <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:400;color:var(--text3);margin-left:8px">auto-loaded on open · yfinance · free</span></div>
+      <div class="vt" id="diag-narrative">Your portfolio gained <span class="hlg">+3.2%</span> this week, driven primarily by <span class="hlg">NVDA (+8.1%)</span> and <span class="hlg">V (+2.4%)</span>. Weakness came from <span class="hlr">TSLA (−6.8%)</span> on a Q1 delivery miss, compounded by EU tariff uncertainty in the EV sector.</div>
+      <div class="vt">Macro backdrop was <span class="hl">supportive</span> — Fed held at 4.25–4.5%, risk assets broadly rallied. Your <span class="hla">beta of 1.24</span> amplified gains; a 5% SPY drawdown costs ~6.2%. Concentration in NVDA (38%) remains primary single-name risk.</div>
+      <div style="height:6px"></div>
+      <div class="dr"><span class="dt">NVDA</span><span class="dc pos" id="d-nvda">+8.1%</span><span class="dw">Earnings beat +12%, GTC catalyst, Blackwell Ultra ahead of schedule. Dual analyst upgrades.</span></div>
+      <div class="dr"><span class="dt">AAPL</span><span class="dc neg" id="d-aapl">−1.2%</span><span class="dw">Profit-taking. EU antitrust fine €500M confirmed. Services growth trajectory intact.</span></div>
+      <div class="dr"><span class="dt">V</span><span class="dc pos" id="d-v">+2.4%</span><span class="dw">Cross-border volumes +12% YoY. Asia-Pacific travel recovery accelerating.</span></div>
+      <div class="dr"><span class="dt">TSLA</span><span class="dc neg" id="d-tsla">−6.8%</span><span class="dw">Q1 deliveries 336k vs 377k consensus. BYD market share gains, EU tariff risk.</span></div>
+      <div class="dr"><span class="dt">BRK.B</span><span class="dc pos" id="d-brkb">+1.1%</span><span class="dw">Steady. Insurance + rail earnings strong. Defensive ballast.</span></div>
+    </div>
+  </div>
+
+  <!-- ══ INTELLIGENCE ══ -->
+  <div id="tab-intelligence" class="panel">
+    <div class="ts-row">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="sl" style="margin:0">Intelligence agent</div>
+        <span class="agent-badge">Gemini Flash 2.0</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="ts-chip" id="ts-intel">Last run: Sun 29 Mar 22:00</span>
+        <button class="refresh-btn free" onclick="runFreeRefresh('intel')">↻ Free refresh · S$0</button>
+        <select id="intel-ai-mode" class="mode-select">
+          <option value="intel-pareto">Pareto · ~S$0.003</option>
+          <option value="intel-full">Full · ~S$0.005</option>
+        </select>
+        <button class="refresh-btn" onclick="requestAiRefresh('intel')">↻ AI refresh</button>
+      </div>
+    </div>
+    <div class="refresh-guide">Free refresh updates yfinance/FRED metrics only. AI refresh uses selected mode (Pareto or Full).</div>
+
+    <div class="confirm-bar" id="confirm-intel-full">
+      Runs full Gemini Flash investor framework report per holding (scorecard + deeper plain-language interpretation of valuation, balance-sheet quality, market expectations, moat/risk context, and practical watchpoints). Est. cost: <strong style="color:var(--amber)">~S$0.005</strong>.
+      <span style="color:var(--green);cursor:pointer;margin-left:8px;font-weight:500" onclick="runAgent('intel-full')">Confirm ↗</span>
+      <span style="color:var(--text3);cursor:pointer;margin-left:8px" onclick="hideConfirm('intel-full')">Cancel</span>
+    </div>
+    <div class="confirm-bar" id="confirm-intel-pareto">
+      Runs Gemini Flash Pareto report on top 20% holdings driving ~80% risk/return, including full scorecard rows plus optional in-depth investor framework cards for selected Pareto holdings. Est. cost: <strong style="color:var(--green)">~S$0.003</strong>.
+      <span style="color:var(--green);cursor:pointer;margin-left:8px;font-weight:500" onclick="runAgent('intel-pareto')">Confirm ↗</span>
+      <span style="color:var(--text3);cursor:pointer;margin-left:8px" onclick="hideConfirm('intel-pareto')">Cancel</span>
+    </div>
+    <div id="intel-full-content">
+      <div class="ts-row" style="margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="sl" style="margin:0">Holdings analysis</div>
+        </div>
+      </div>
+      <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rl);margin-bottom:6px;overflow-x:auto">
+        <table class="htable">
+          <thead>
+            <tr>
+              <th rowspan="2" style="width:118px">Holding</th>
+              <th rowspan="2" style="width:86px">Overall score</th>
+              <th colspan="3" style="text-align:center">Valuation</th>
+              <th colspan="3" style="text-align:center">Financial strength</th>
+              <th colspan="1" style="text-align:center">Market signal</th>
+              <th rowspan="2" style="min-width:330px">Synthesis</th>
+            </tr>
+            <tr>
+              <th style="width:88px">Fwd P/E</th>
+              <th style="width:72px">PEG</th>
+              <th style="width:98px">Value status</th>
+              <th style="width:96px">Profits (%)</th>
+              <th style="width:132px">Earnings</th>
+              <th style="width:120px">Cash</th>
+              <th style="width:130px">Analyst target price</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="h-ticker">NVDA</div><div class="h-name">Nvidia</div></td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--green)">87 / 100</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">31.4x</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">1.05</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--blue)">Fair</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--green)">+35%</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">Beat +12%<br>Guide +5%</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">Net cash<br>High conversion</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">$1,050 <span style="color:var(--green)">(+18%)</span></td>
+              <td>High-quality compounder with premium expectations already priced; upside path depends on continued earnings delivery and policy stability.<br><button class="deep-btn" onclick="runHoldingDeepDive('NVDA')">More in-depth analysis</button></td>
+            </tr>
+            <tr>
+              <td><div class="h-ticker">AAPL</div><div class="h-name">Apple</div></td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--blue)">74 / 100</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">26.1x</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">1.82</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--blue)">Fair</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--green)">+8%</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">Beat +4%<br>Guide +1%</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">Net positive cash<br>Resilient FCF</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">$210 <span style="color:var(--green)">(+15%)</span></td>
+              <td>Defensive quality with stable moat economics; returns likely driven by execution consistency more than multiple rerating.<br><button class="deep-btn" onclick="runHoldingDeepDive('AAPL')">More in-depth analysis</button></td>
+            </tr>
+            <tr>
+              <td><div class="h-ticker">V</div><div class="h-name">Visa</div></td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--green)">85 / 100</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">28.4x</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">1.46</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--green)">Under</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--green)">+14%</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">Beat +6%<br>Guide +4%</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">Strong FCF<br>Low leverage</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">$310 <span style="color:var(--green)">(+14%)</span></td>
+              <td>Strong network-moat profile with high cash conversion; attractive risk/reward if cross-border normalization persists.<br><button class="deep-btn" onclick="runHoldingDeepDive('V')">More in-depth analysis</button></td>
+            </tr>
+            <tr>
+              <td><div class="h-ticker">TSLA</div><div class="h-name">Tesla</div></td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--amber)">56 / 100</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">84.2x</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">2.74</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--amber)">Over</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--red)">-12%</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">Miss -3%<br>Guide cautious</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">Net cash<br>Margin pressure</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">$185 <span style="color:var(--green)">(+6%)</span></td>
+              <td>Wide-dispersion setup: optionality exists, but fundamentals need to re-stabilize to justify valuation premium.<br><button class="deep-btn" onclick="runHoldingDeepDive('TSLA')">More in-depth analysis</button></td>
+            </tr>
+            <tr>
+              <td><div class="h-ticker">BRK.B</div><div class="h-name">Berkshire</div></td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--blue)">79 / 100</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">19.8x</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">1.30</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--green)">Under</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--green)">+9%</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">Beat +3%<br>Guide n/a</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">&gt;$170B cash</td>
+              <td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">$430 <span style="color:var(--green)">(+9%)</span></td>
+              <td>Lower-beta compounding anchor with capital-allocation optionality; supports portfolio resilience in volatile tapes.<br><button class="deep-btn" onclick="runHoldingDeepDive('BRK.B')">More in-depth analysis</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="cache-note">Sources: yfinance fundamentals + free market data baselines, then Gemini Flash (paid) for synthesis, score normalization, and plain-language investor framing</div>
+      <div id="holding-deepdive-wrap" style="display:none;margin-top:8px">
+        <div class="deep-report">
+          <div class="deep-title" id="holding-deepdive-title">In-depth analysis</div>
+          <div class="deep-grid" id="holding-deepdive-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="intel-pareto-content" style="display:none">
+      <div style="display:flex;align-items:center;gap:8px;margin:14px 0 8px">
+        <div class="sl" style="margin:0">Pareto analysis</div>
+        <span class="free-tag">top 20% holdings · ~80% risk/return</span>
+      </div>
+      <div class="pareto-panel visible" id="intel-pareto-panel">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);margin-bottom:8px;letter-spacing:0.08em">PARETO FOCUS — CONCENTRATED RISK/RETURN DRIVERS</div>
+      <div class="triggered-stocks" style="margin-bottom:10px">
+        <span class="trig-pill">NVDA · 38% weight · +8.1% 1W</span>
+        <span class="trig-pill">TSLA · 12% weight · −6.8% 1W</span>
+      </div>
+      <div class="proj-block">
+        <div class="proj-header">
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text)">NVDA</span><span class="sb sig-hold">DRIVER</span></div>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--green)">+8.1% (1W)</span>
+        </div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.65;font-family:var(--analysis-font);letter-spacing:0.01em">
+          Price strength was driven by two things at once: estimate upgrades after earnings and renewed confidence that hyperscaler AI spending can stay elevated. That is healthier than a pure valuation rally because part of the move is tied to real earnings momentum. Practical interpretation: NVDA still has fundamental support, but expectations are now high. If policy headlines tighten export controls, valuation can compress quickly even if long-term demand remains intact.
+        </div>
+      </div>
+      <div class="proj-block">
+        <div class="proj-header">
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text)">TSLA</span><span class="sb sig-watch">DRAG</span></div>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--red)">−6.8% (1W)</span>
+        </div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.65;font-family:var(--analysis-font);letter-spacing:0.01em">
+          Weakness was concentrated in softer demand signals and lower confidence in near-term deliveries. Because TSLA trades on execution premium, disappointments tend to create larger downside reactions than typical mega-cap stocks. For a non-specialist investor, focus on three checkpoints: whether price cuts deepen, whether margins hold up without credits, and whether energy storage growth is strong enough to offset softer auto trends.
+        </div>
+      </div>
+      <div class="cache-note" style="margin-top:8px">Sources: yfinance return/weight concentration (free) + Gemini Flash Pareto synthesis (paid) focused on stock-level driver attribution</div>
+      <div style="margin-top:10px">
+        <div class="sl" style="margin:0 0 8px">Selected pareto holdings — full scorecard rows</div>
+        <div id="intel-pareto-scorecard"></div>
+        <div id="holding-deepdive-pareto-wrap" style="display:none;margin-top:8px">
+          <div class="deep-report">
+            <div class="deep-title" id="holding-deepdive-pareto-title">In-depth analysis</div>
+            <div class="deep-grid" id="holding-deepdive-pareto-grid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <!-- Macro Context -->
+    <div style="margin-top:14px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="sl" style="margin:0">Macro context — last 7 days</div>
+          <span class="agent-badge">Gemini Flash summary</span>
+        </div>
+        <button class="refresh-btn" onclick="showConfirm('intel-macro')">↻ Refresh macro · ~S$0.001</button>
+      </div>
+      <div class="confirm-bar" id="confirm-intel-macro">
+        Calls Gemini Flash 2.0 for plain-language macro synthesis (Fed, CPI/PCE, fear & greed, sector rotation, and key events with portfolio impact). Est. cost: <strong style="color:var(--green)">~S$0.001</strong>.
+        <span style="color:var(--green);cursor:pointer;margin-left:8px;font-weight:500" onclick="runAgent('intel-macro')">Confirm ↗</span>
+        <span style="color:var(--text3);cursor:pointer;margin-left:8px" onclick="hideConfirm('intel-macro')">Cancel</span>
+      </div>
+      <div class="verdict-block" style="margin-bottom:10px">
+        <div class="verdict-title">Summary</div>
+        <div class="vt">Markets are still supportive for quality growth, but they are becoming less forgiving. Companies that deliver clean earnings and credible guidance are being rewarded, while misses are punished faster than before.</div>
+        <div class="vt">For your portfolio, this means upside can continue if the stronger businesses keep executing, but concentration risk is now a bigger factor than headline index direction. A small number of large positions can dominate monthly performance in both directions.</div>
+        <div class="vt">In practical terms for a non-specialist investor: stay invested, but treat position sizing as your first risk-control tool. You do not need to predict every macro headline; you need clear rules for trimming oversized winners and protecting weaker names.</div>
+      </div>
+      <div class="cache-note" style="margin-bottom:8px">Sources: Fed/BLS/CME and sector proxy series via free market/FRED-style feeds; sentiment from public fear-greed index feed; Gemini Flash (paid) converts raw points into plain-language portfolio implications</div>
+      <div class="macro-grid">
+        <div class="macro-card macro-card-tall-right">
+          <div class="macro-label">Key events / geo</div>
+          <div class="macro-val" style="color:var(--amber)">High-impact week</div>
+          <div class="event-summary">Market tone is still constructive, but event risk is clustering around inflation, mega-cap earnings, and geopolitics. Most likely impact is higher single-stock dispersion rather than broad index breakdown.</div>
+          <div class="event-stack">
+            <div class="event-box">
+              <div class="event-head">US CPI release</div>
+              <div class="event-body">A hotter print would delay cut expectations and pressure long-duration growth multiples.</div>
+            </div>
+            <div class="event-box">
+              <div class="event-head">Big-tech earnings updates</div>
+              <div class="event-body">Guidance quality matters more than headline beats; capex commentary can reprice AI leaders quickly.</div>
+            </div>
+            <div class="event-box">
+              <div class="event-head">China activity + EV demand</div>
+              <div class="event-body">Soft prints would challenge cyclical and EV assumptions, especially for high-expectation names.</div>
+            </div>
+            <div class="event-box">
+              <div class="event-head">Middle East tension</div>
+              <div class="event-body">Keeps energy and freight risk premium elevated; can raise market volatility around macro headlines.</div>
+            </div>
+          </div>
+        </div>
+        <div class="macro-card">
+          <div class="macro-label">Fed / rates</div>
+          <div class="macro-val" style="color:var(--text2)">4.25–4.5%</div>
+          <div class="macro-sub">Held. CME FedWatch: 72% chance of cut in Jun. Next FOMC: May 7. Dot plot signals 2 cuts in 2025.</div>
+        </div>
+        <div class="macro-card">
+          <div class="macro-label">CPI / PCE</div>
+          <div class="macro-val" style="color:var(--amber)">3.1% CPI</div>
+          <div class="macro-sub">Feb CPI 3.1%, core 3.8%. PCE 2.8% — above 2% target. Disinflation stalling. No urgency to cut.</div>
+        </div>
+        <div class="macro-card">
+          <div class="macro-label">Sector rotation</div>
+          <div class="macro-val" style="color:var(--green)">Tech / AI</div>
+          <div class="macro-sub">XLK +3.1% WTD. XLE −1.2%. XLF flat. Money rotating from energy into tech post-Fed hold. Semis leading.</div>
+        </div>
+        <div class="macro-card">
+          <div class="macro-label">Fear & greed</div>
+          <div class="macro-val" style="color:var(--amber)">61 / Greed</div>
+          <div class="macro-sub">Consumer Fear & Greed index sits in Greed territory: risk appetite is healthy, but positioning is crowded enough that negative surprises can trigger fast pullbacks.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STRATEGY ══ -->
+  <div id="tab-strategy" class="panel">
+    <div class="ts-row">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="sl" style="margin:0">Strategy agent</div>
+        <span class="agent-badge">Claude Sonnet</span>
+        <span class="free-tag">yfinance + FRED · free data</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="ts-chip" id="ts-strategy">Last run: Sun 29 Mar 22:00</span>
+        <button class="refresh-btn free" onclick="runFreeRefresh('strategy')">↻ Free refresh · S$0</button>
+        <select id="strategy-ai-mode" class="mode-select">
+          <option value="strategy-pareto">Pareto · ~S$0.007</option>
+          <option value="strategy">Full · ~S$0.012</option>
+        </select>
+        <button class="refresh-btn" onclick="requestAiRefresh('strategy')">↻ AI refresh</button>
+      </div>
+    </div>
+    <div class="refresh-guide">Free refresh recalculates deterministic strategy inputs. AI refresh uses selected mode (Pareto or Full).</div>
+    <div class="confirm-bar" id="confirm-strategy">
+      Calls Claude Sonnet with full portfolio + Intelligence context for comprehensive actionable recommendations, strategic verdict, and conviction thesis in plain language. Est. cost: <strong style="color:var(--amber)">~S$0.012</strong>.
+      <span style="color:var(--green);cursor:pointer;margin-left:8px;font-weight:500" onclick="runAgent('strategy')">Confirm ↗</span>
+      <span style="color:var(--text3);cursor:pointer;margin-left:8px" onclick="hideConfirm('strategy')">Cancel</span>
+    </div>
+    <div class="confirm-bar" id="confirm-strategy-pareto">
+      Calls Claude Sonnet in Pareto mode for highest-impact actions plus clear deep-dive strategy notes for selected Pareto holdings only. Est. cost: <strong style="color:var(--green)">~S$0.007</strong>.
+      <span style="color:var(--green);cursor:pointer;margin-left:8px;font-weight:500" onclick="runAgent('strategy-pareto')">Confirm ↗</span>
+      <span style="color:var(--text3);cursor:pointer;margin-left:8px" onclick="hideConfirm('strategy-pareto')">Cancel</span>
+    </div>
+
+    <div class="pareto-panel" id="strategy-pareto-panel">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);margin-bottom:8px;letter-spacing:0.08em">PARETO SUMMARY — TOP ACTIONS ONLY</div>
+      <div class="triggered-stocks" style="margin-bottom:10px">
+        <span class="trig-pill">NVDA · weight 38% >20%</span>
+        <span class="trig-pill">TSLA · P&L contrib −18%</span>
+      </div>
+      <div class="lever-card">
+        <div class="lever-label">Largest lever — highest risk/return improvement</div>
+        <div class="lever-title">Trim NVDA 8% → rotate into V: expected +0.8 Sharpe improvement</div>
+        <div class="lever-text">One trade pair with clear risk logic: sell about S$3,850 NVDA (38%→30%) and add the same amount to V (18%→26%). This keeps strong upside exposure while reducing dependence on one stock. It also increases allocation to a cash-generative business with more stable earnings, and your Visa ESPP discount adds an additional return cushion. In plain language: this is the highest impact move with the least complexity.</div>
+      </div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);margin-bottom:6px;letter-spacing:0.08em">ALL ACTIONS — IMPACT PER UNIT EFFORT</div>
+      <div class="impact-row"><span class="impact-rank pos">1</span><span class="impact-action"><span style="color:var(--text);font-weight:500">Trim NVDA → add V</span> · frees S$3.8K, cuts beta drag, adds conviction underweight</span><span class="impact-badge rr-exc">Critical</span></div>
+      <div class="impact-row"><span class="impact-rank" style="color:var(--amber)">2</span><span class="impact-action"><span style="color:var(--text);font-weight:500">TSLA stop at $160</span> · third delivery miss · limits downside on 12% position</span><span class="impact-badge rr-str">High</span></div>
+      <div class="impact-row"><span class="impact-rank" style="color:var(--blue)">3</span><span class="impact-action"><span style="color:var(--text);font-weight:500">Confirm ESPP S$600</span> · 15% purchase discount (~17.6% instant uplift) · low market timing risk</span><span class="impact-badge" style="background:var(--green-dim);color:var(--green);border:0.5px solid var(--green)">Free alpha</span></div>
+      <div class="cache-note" style="margin-top:8px">Sources: deterministic risk math from holdings and returns (free) + Claude Sonnet (paid) for summarized Pareto actions and deep-dive explanations · ~S$0.007 vs S$0.012 full</div>
+      <div style="margin-top:10px">
+        <div class="sl" style="margin:0 0 8px">Pareto deep dives — selected holdings only</div>
+        <div id="strategy-pareto-deep"></div>
+      </div>
+    </div>
+
+    <div id="strategy-full-content">
+      <!-- Verdict -->
+      <div class="verdict-block" style="margin-bottom:12px">
+        <div class="verdict-title">Strategic verdict</div>
+        <div class="vt">Your portfolio quality is strong, but risk is concentrated. NVDA remains a high-quality winner, yet at 38% weight it can now dominate outcomes. V is still underweight versus conviction, while BRK.B continues to work as a stabilizer when volatility rises.</div>
+        <div class="vt">Best next step is not a full strategy reset; it is a targeted rebalance. Trim part of NVDA gains and rotate into V to improve diversification without giving up growth exposure. TSLA should stay in strict risk-management mode until operating metrics clearly improve.</div>
+        <div class="vt">For a non-finance user: think of this as improving portfolio balance, not predicting the market. Keep your strongest ideas, but avoid letting one position become so large that it can undo progress from the rest of the portfolio.</div>
+      </div>
+
+      <div class="sl" style="margin-bottom:10px">Actionable recommendations</div>
+      <div class="action-grid">
+        <div class="action-card green"><div class="action-label green">Action 1 — Rebalance</div><div class="action-title">Trim NVDA, add Visa</div><div class="action-text">NVDA is still a core holding, but 38% weight is above your 30% risk budget. Realize a portion of gains and redeploy into V to keep upside while reducing concentration. This single move improves portfolio balance and lowers the chance that one stock dictates total returns.</div><div class="action-btns"><button class="abtn abtn-sell">Sell ~S$3.8K NVDA</button><button class="abtn abtn-buy">Buy ~S$3.8K V</button></div></div>
+        <div class="action-card amber"><div class="action-label amber">Action 2 — Risk management</div><div class="action-title">Set TSLA stop at $160</div><div class="action-text">TSLA now has a wider range of outcomes than your other holdings. A stop near $160 limits downside if execution weakens again, while still allowing upside if fundamentals recover. Keep position size tactical until margins and demand trend improve.</div><div class="action-btns"><button class="abtn abtn-watch">Watch closely</button><button class="abtn abtn-sell">Exit at $160</button></div></div>
+        <div class="action-card blue"><div class="action-label blue">Action 3 — Hold conviction</div><div class="action-title">AAPL + BRK.B — no action</div><div class="action-text">AAPL still provides quality cash flows and ecosystem durability, and BRK.B continues to reduce overall portfolio swing risk. Neither position needs immediate changes. Let them do their jobs while you focus active decisions on the higher-impact positions.</div><div class="action-btns"><button class="abtn abtn-hold">Hold AAPL</button><button class="abtn abtn-hold">Hold BRK.B</button></div></div>
+        <div class="action-card purple"><div class="action-label purple">Action 4 — Monitor</div><div class="action-title">V ESPP — deploy S$600 this month</div><div class="action-text">Your recurring ESPP contribution is a structural edge: the 15% discount gives a built-in buffer against short-term volatility. Prioritize full monthly participation before making extra discretionary buys, then layer additional buys only when portfolio weights remain within target ranges.</div><div class="action-btns"><button class="abtn abtn-buy">Confirm S$600 ESPP</button></div></div>
+      </div>
+
+      <div class="sl" style="margin-bottom:10px">Conviction ranking — where capital works hardest</div>
+      <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rl);margin-bottom:12px;overflow:hidden">
+        <table class="conviction-table">
+          <thead><tr><th style="width:30px">#</th><th style="width:70px">Ticker</th><th>Thesis</th><th style="width:80px">Fwd P/E</th><th style="width:100px">Risk/reward</th></tr></thead>
+          <tbody>
+            <tr><td style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;color:var(--green)">1</td><td style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;color:var(--text)">V</td><td>Thesis: durable payment network with recurring transaction growth, plus your employee-domain understanding improves decision quality. ESPP discount increases margin of safety and supports compounding over time.</td><td style="font-family:'IBM Plex Mono',monospace;color:var(--green)">28.4x</td><td><span class="rr-badge rr-exc">Exceptional</span></td></tr>
+            <tr><td style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;color:var(--green)">2</td><td style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;color:var(--text)">NVDA</td><td>Thesis: industry leadership in AI infrastructure remains strong, but current weight already reflects high confidence. Keep as a core holding, while trimming size to reduce single-stock dependency risk.</td><td style="font-family:'IBM Plex Mono',monospace;color:var(--green)">20.3x</td><td><span class="rr-badge rr-exc">Exceptional</span></td></tr>
+            <tr><td style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;color:var(--blue)">3</td><td style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;color:var(--text)">AAPL</td><td>Thesis: resilient ecosystem and services mix support steadier earnings quality. Upside is likely gradual rather than explosive, making AAPL a quality stabilizer within the growth sleeve.</td><td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">26.1x</td><td><span class="rr-badge rr-str">Strong</span></td></tr>
+            <tr><td style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;color:var(--blue)">4</td><td style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;color:var(--text)">BRK.B</td><td>Thesis: diversified cash-generative businesses plus large liquidity provide downside resilience. This position helps balance higher-beta names during volatile periods.</td><td style="font-family:'IBM Plex Mono',monospace;color:var(--text2)">19.8x</td><td><span class="rr-badge rr-str">Strong</span></td></tr>
+            <tr><td style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;color:var(--amber)">5</td><td style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;color:var(--text)">TSLA</td><td>Thesis: still high optionality, but near-term fundamentals are less predictable than peers. Keep exposure disciplined until delivery quality and margin direction are consistently improving.</td><td style="font-family:'IBM Plex Mono',monospace;color:var(--amber)">84.2x</td><td><span class="rr-badge" style="background:var(--amber-dim);color:var(--amber);border:0.5px solid var(--amber)">Uncertain</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sl" style="margin-bottom:10px">Target portfolio — post rebalance</div>
+      <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rl);margin-bottom:12px;overflow:hidden">
+        <table class="target-table">
+          <thead><tr><th style="width:70px">Ticker</th><th style="width:90px">Current wt.</th><th style="width:30px"></th><th style="width:80px">Target wt.</th><th style="width:80px">Action</th><th>Rationale</th></tr></thead>
+          <tbody>
+            <tr><td style="font-family:'IBM Plex Mono',monospace;font-weight:500;color:var(--text)">NVDA</td><td style="font-family:'IBM Plex Mono',monospace">38%</td><td style="color:var(--text3)">→</td><td style="font-family:'IBM Plex Mono',monospace">30%</td><td class="neg" style="font-family:'IBM Plex Mono',monospace">−8%</td><td>Concentration risk; earnings catalyst priced in</td></tr>
+            <tr><td style="font-family:'IBM Plex Mono',monospace;font-weight:500;color:var(--text)">V</td><td style="font-family:'IBM Plex Mono',monospace">18%</td><td style="color:var(--text3)">→</td><td style="font-family:'IBM Plex Mono',monospace">26%</td><td class="pos" style="font-family:'IBM Plex Mono',monospace">+8%</td><td>Underweight vs conviction; ESPP discount amplifies return</td></tr>
+            <tr><td style="font-family:'IBM Plex Mono',monospace;font-weight:500;color:var(--text)">AAPL</td><td style="font-family:'IBM Plex Mono',monospace">22%</td><td style="color:var(--text3)">→</td><td style="font-family:'IBM Plex Mono',monospace">22%</td><td style="font-family:'IBM Plex Mono',monospace;color:var(--text3)">≈</td><td>Hold — services growth, upgrade cycle ahead</td></tr>
+            <tr><td style="font-family:'IBM Plex Mono',monospace;font-weight:500;color:var(--text)">BRK.B</td><td style="font-family:'IBM Plex Mono',monospace">10%</td><td style="color:var(--text3)">→</td><td style="font-family:'IBM Plex Mono',monospace">12%</td><td class="pos" style="font-family:'IBM Plex Mono',monospace">+2%</td><td>Beta ballast; Buffett cash optionality in corrections</td></tr>
+            <tr><td style="font-family:'IBM Plex Mono',monospace;font-weight:500;color:var(--text)">TSLA</td><td style="font-family:'IBM Plex Mono',monospace">12%</td><td style="color:var(--text3)">→</td><td style="font-family:'IBM Plex Mono',monospace">10%</td><td class="neg" style="font-family:'IBM Plex Mono',monospace">−2%</td><td>Three delivery misses; thesis uncertainty; do not add</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="cache-note">Sources: yfinance prices/fundamentals + FRED macro series (free) + Claude Sonnet for recommendations/verdict/thesis only on manual refresh (paid) · weekly digest Sun 22:00 SGT · not financial advice</div>
+  </div>
+
+  <!-- ══ MY TRADES ══ -->
+  <div id="tab-trades" class="panel">
+    <div class="ts-row">
+      <div class="sl" style="margin:0">Trade log</div>
+      <span class="ts-chip">Browser localStorage · never transmitted</span>
+    </div>
+
+    <div class="panel-box" style="margin-bottom:12px">
+      <div class="sl" style="margin-bottom:10px">Log a trade</div>
+      <div class="form-row">
+        <div><div class="form-label">Ticker</div><input class="form-input" id="t-ticker" placeholder="e.g. V" style="text-transform:uppercase" oninput="handleTickerInput()"></div>
+        <div><div class="form-label">Type</div><select class="form-input" id="t-type" onchange="handleTickerInput()"><option value="BUY">Buy</option><option value="SELL">Sell</option></select></div>
+        <div><div class="form-label">Shares</div><input class="form-input" id="t-shares" type="number" placeholder="2.2" min="0" step="0.01"></div>
+        <div><div class="form-label">Price (USD)</div><input class="form-input" id="t-price" type="number" placeholder="256.10" min="0" step="0.01" oninput="handleTickerInput()"></div>
+        <div><div class="form-label">Date</div><input class="form-input" id="t-date" type="date"></div>
+        <div><div class="form-label">&nbsp;</div><button class="add-btn" onclick="addTrade()">+ Add</button></div>
+      </div>
+      <div class="confirm-bar" id="confirm-espp-v">
+        Visa <strong style="color:var(--green)">BUY</strong> detected. Apply <strong style="color:var(--green)">15% ESPP discount</strong> to the entered price before logging?
+        <span style="color:var(--green);cursor:pointer;margin-left:8px;font-weight:500" onclick="approveTradeESPP()">Apply discount</span>
+        <span style="color:var(--text3);cursor:pointer;margin-left:8px" onclick="skipTradeESPP()">Skip</span>
+      </div>
+      <div style="font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace">All data stored in browser localStorage · never transmitted</div>
+    </div>
+
+    <div class="panel-box">
+      <div class="sl" style="margin-bottom:10px">Trade history</div>
+      <div style="overflow-x:auto">
+        <table class="trade-table">
+          <thead><tr><th style="width:60px">Ticker</th><th style="width:55px">Type</th><th style="width:55px">Shares</th><th style="width:90px">Price (USD)</th><th style="width:95px">Date</th><th style="width:75px">Value</th><th style="width:24px"></th></tr></thead>
+          <tbody id="trade-tbody">
+            <tr><td>NVDA</td><td><span class="type-badge buy-b">BUY</span></td><td>20</td><td>$740.00</td><td>15 Jan 2025</td><td>$14,800</td><td><button class="del-btn" onclick="delTrade(this)">✕</button></td></tr>
+            <tr><td>AAPL</td><td><span class="type-badge buy-b">BUY</span></td><td>50</td><td>$165.00</td><td>3 Feb 2025</td><td>$8,250</td><td><button class="del-btn" onclick="delTrade(this)">✕</button></td></tr>
+            <tr><td>V</td><td><span class="type-badge buy-b">BUY</span></td><td>30</td><td>$250.00</td><td>1 Mar 2025</td><td>$7,500</td><td><button class="del-btn" onclick="delTrade(this)">✕</button></td></tr>
+            <tr><td>V</td><td><span class="type-badge buy-b">BUY</span></td><td>2.20</td><td>$230.44</td><td>1 Mar 2026</td><td>$507</td><td><button class="del-btn" onclick="delTrade(this)">✕</button></td></tr>
+            <tr><td>TSLA</td><td><span class="type-badge buy-b">BUY</span></td><td>15</td><td>$210.00</td><td>10 Mar 2025</td><td>$3,150</td><td><button class="del-btn" onclick="delTrade(this)">✕</button></td></tr>
+            <tr><td>BRK.B</td><td><span class="type-badge buy-b">BUY</span></td><td>10</td><td>$370.00</td><td>20 Mar 2025</td><td>$3,700</td><td><button class="del-btn" onclick="delTrade(this)">✕</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="cost-bar">
+    <span class="cost-item">Est. monthly cost:</span>
+    <span class="cost-item">Intelligence (22 mkt days): <span class="cost-val" id="c-intel">S$0.11</span></span>
+    <span class="cost-item">Strategy (weekly): <span class="cost-val" id="c-strat">S$0.08</span></span>
+    <span class="cost-item">Email digest (weekly): <span class="cost-val" id="c-email">S$0.01</span></span>
+    <span class="cost-item">Data inputs: <span class="cost-val">Free</span></span>
+    <span class="cost-item" style="font-weight:500">Total: <span class="cost-val" id="c-total" style="color:var(--text)">S$0.20/mo</span></span>
+    <span class="cost-item" id="c-model">Model: free refreshes are S$0; estimate assumes paid Intel Pareto + Macro daily, Intel Full weekly, and Strategy Full + Pareto weekly</span>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+var PERIOD_DATA={
+  '1D':{port:'+2.86%',qqq:'+1.62%',spy:'+0.42%',qqq_d:'+1.24% ahead',spy_d:'+2.44% ahead',label:'1 day',ret:'+2.86%',avg:'+2.86% today',ret_lbl:'vs yesterday',
+    diag:{nvda:'+4.2%',aapl:'−0.8%',v:'+1.1%',tsla:'−2.1%',brkb:'+0.3%'},
+    chart:{labels:['9am','10am','11am','12pm','1pm','2pm','3pm','4pm'],port:[0,0.8,1.2,1.8,2.1,2.5,2.7,2.86],qqq:[0,0.4,0.6,0.9,1.0,1.3,1.5,1.62],spy:[0,0.1,0.2,0.2,0.3,0.3,0.4,0.42]}},
+  '1W':{port:'+3.20%',qqq:'+1.80%',spy:'+0.90%',qqq_d:'+1.40% ahead',spy_d:'+2.30% ahead',label:'1 week',ret:'+3.20%',avg:'+0.64%/day',ret_lbl:'vs last week',
+    diag:{nvda:'+8.1%',aapl:'−1.2%',v:'+2.4%',tsla:'−6.8%',brkb:'+1.1%'},
+    chart:{labels:['Mon','Tue','Wed','Thu','Fri'],port:[0,1.1,1.8,2.4,3.2],qqq:[0,0.5,0.9,1.3,1.8],spy:[0,0.2,0.4,0.6,0.9]}},
+  'MTD':{port:'+5.10%',qqq:'+3.20%',spy:'+1.80%',qqq_d:'+1.90% ahead',spy_d:'+3.30% ahead',label:'month to date',ret:'+5.10%',avg:'+0.17%/day',ret_lbl:'MTD',
+    diag:{nvda:'+10.2%',aapl:'−0.8%',v:'+3.1%',tsla:'−8.4%',brkb:'+1.5%'},
+    chart:{labels:['Wk1','Wk2','Wk3','Wk4'],port:[0,2.1,3.8,5.1],qqq:[0,1.1,2.0,3.2],spy:[0,0.6,1.2,1.8]}},
+  'YTD':{port:'+12.40%',qqq:'+8.10%',spy:'+5.30%',qqq_d:'+4.30% ahead',spy_d:'+7.10% ahead',label:'year to date',ret:'+12.40%',avg:'+1.03%/mo',ret_lbl:'YTD',
+    diag:{nvda:'+22.1%',aapl:'+3.2%',v:'+8.4%',tsla:'−14.2%',brkb:'+4.1%'},
+    chart:{labels:['Jan','Feb','Mar','Apr'],port:[0,4.2,8.6,12.4],qqq:[0,2.8,5.5,8.1],spy:[0,1.8,3.6,5.3]}},
+  '1Y':{port:'+18.30%',qqq:'+14.60%',spy:'+11.20%',qqq_d:'+3.70% ahead',spy_d:'+7.10% ahead',label:'1 year',ret:'+18.30%',avg:'+1.53%/mo',ret_lbl:'1 year',
+    diag:{nvda:'+42.1%',aapl:'+6.8%',v:'+14.2%',tsla:'−28.4%',brkb:'+8.2%'},
+    chart:{labels:['Q2\'24','Q3\'24','Q4\'24','Q1\'25'],port:[0,6.2,11.4,18.3],qqq:[0,4.1,8.8,14.6],spy:[0,3.2,7.1,11.2]}},
+  '3Y':{port:'+42.10%',qqq:'+31.40%',spy:'+24.80%',qqq_d:'+10.70% ahead',spy_d:'+17.30% ahead',label:'3 year',ret:'+42.10%',avg:'+1.17%/mo',ret_lbl:'3 year',
+    diag:{nvda:'+180.2%',aapl:'+18.4%',v:'+22.1%',tsla:'−42.1%',brkb:'+24.8%'},
+    chart:{labels:['2022','2023','2024','2025'],port:[0,12.4,28.6,42.1],qqq:[0,8.2,20.1,31.4],spy:[0,6.4,15.8,24.8]}},
+  'ALL':{port:'+28.50%',qqq:'+22.10%',spy:'+18.40%',qqq_d:'+6.40% ahead',spy_d:'+10.10% ahead',label:'since inception (Jan 2025)',ret:'+28.50%',avg:'+1.90%/mo',ret_lbl:'since Jan 2025',
+    diag:{nvda:'+19.7%',aapl:'+10.7%',v:'+8.4%',tsla:'−16.6%',brkb:'+6.4%'},
+    chart:{labels:['Jan','Apr','Jul','Oct','Jan','Apr'],port:[0,5.2,11.4,18.2,22.8,28.5],qqq:[0,3.8,8.2,13.4,17.6,22.1],spy:[0,2.8,6.1,10.2,14.8,18.4]}}
+};
+var chartMode='pct';
+var currentPeriod='1D';
+var perfChart=null;
+var sparkCharts={};
+var CURRENT_PRICES={nvda:886.40,aapl:182.60,v:271.10,tsla:175.20,brkb:393.80};
+var HOLDING_DEEP_DIVE={
+  'NVDA':[
+    {h:'Business model & moat',b:'NVIDIA\'s moat comes from a rare combination of hardware scale and software lock-in. In practical terms, customers build workflows around CUDA and tuned model stacks, so switching away is costly and slow. This makes revenue more durable than a normal chip cycle.'},
+    {h:'Financial resilience',b:'Profitability remains elite, with strong free-cash-flow conversion and balance-sheet flexibility. For non-specialist investors: this means the company can keep investing through slower periods without relying on expensive external funding.'},
+    {h:'Growth drivers (next 3-5 years)',b:'Main engines are hyperscaler AI spend, enterprise inference adoption, and sovereign AI infrastructure buildouts. Even if growth slows from extreme highs, the base case still implies above-market expansion if execution remains clean.'},
+    {h:'Risk map & what to monitor',b:'Biggest structural risk is policy and export controls. Operationally, watch estimate revisions, customer concentration, and gross-margin durability. If revisions flatten while valuation stays premium, risk/reward usually weakens quickly.'},
+    {h:'Valuation view',b:'Current pricing implies confidence in continued execution. Fair-value range is still supportable, but less forgiving than a year ago. Translation: upside remains, but downside gets sharper if guidance quality slips.'},
+    {h:'Investor takeaway',b:'Treat NVDA as a core growth position, but actively manage position size. You do not need to reduce conviction; you need to reduce concentration so one policy shock does not dominate the whole portfolio.'}
+  ],
+  'AAPL':[
+    {h:'Business model & moat',b:'Apple\'s moat is driven by brand strength and ecosystem switching costs. Users stay because devices, services, and subscriptions work together. That creates repeat revenue and improves predictability compared with hardware-only businesses.'},
+    {h:'Financial resilience',b:'Cash generation remains robust and supports buybacks, dividends, and product investment. In plain terms, Apple has room to absorb macro slowdowns while still returning capital to shareholders.'},
+    {h:'Growth drivers (next 3-5 years)',b:'Services expansion, installed-base monetization, and upgrade cycles are the key drivers. AI features can help retention and premium mix, but the investment case remains quality compounding more than hyper-growth.'},
+    {h:'Risk map & what to monitor',b:'Key risks are regulation, regional demand softness, and product-cycle volatility. Watch Services growth, gross margin mix, and China demand trends for early signs of thesis drift.'},
+    {h:'Valuation view',b:'Valuation looks broadly fair for a high-quality compounder. Re-rating upside exists, but it usually depends on sustained Services momentum and margin stability rather than short-term headlines.'},
+    {h:'Investor takeaway',b:'AAPL fits as a quality anchor with moderate growth. Expect steadier compounding, not explosive upside; its role is reliability and drawdown support inside a growth portfolio.'}
+  ],
+  'V':[
+    {h:'Business model & moat',b:'Visa\'s moat is network effects at global scale: more merchants attract more consumers and issuers, and vice versa. Competitors can enter niches, but replicating global acceptance and trust is difficult and expensive.'},
+    {h:'Financial resilience',b:'High margins, low capital intensity, and strong free cash flow make Visa financially resilient. For non-finance users: the business converts a large share of revenue into cash that can fund buybacks and growth.'},
+    {h:'Growth drivers (next 3-5 years)',b:'Cross-border travel normalization, cash-to-digital conversion, and value-added services are durable drivers. Growth is usually less cyclical than many sectors because payment volume continues to expand with GDP and digital penetration.'},
+    {h:'Risk map & what to monitor',b:'Primary structural risk is regulatory pressure on fees and potential disruption from alternative rails. Watch cross-border growth, take-rate trend, and policy developments in major regions.'},
+    {h:'Valuation view',b:'Valuation is reasonable relative to moat durability and earnings consistency. Combined with ESPP discount mechanics, expected risk-adjusted compounding remains attractive for long-horizon investors.'},
+    {h:'Investor takeaway',b:'High-conviction long-duration holding with balanced downside profile. Useful as a portfolio quality diversifier, especially when AI-heavy exposure needs a steadier cash-generative counterweight.'}
+  ],
+  'TSLA':[
+    {h:'Business model & moat',b:'Tesla still has strengths in brand and manufacturing scale, but moat durability is less one-directional than before as competition and pricing pressure increase. Outcome range is now wider and more sensitive to execution.'},
+    {h:'Financial resilience',b:'Balance sheet is not the weak point; earnings quality is. Recent quarters show more pressure on margins and operating consistency. In plain terms, valuation still assumes strong execution that has become harder to prove.'},
+    {h:'Growth drivers (next 3-5 years)',b:'Long-term upside comes from energy storage, software optionality, and platform scale if execution re-accelerates. Base case is more moderate auto growth with higher volatility in quarterly results.'},
+    {h:'Risk map & what to monitor',b:'Most important watchpoints are delivery quality, price cuts, gross margin ex-credits, and guidance credibility. If these trend weakly together, downside can compound quickly because expectations remain high.'},
+    {h:'Valuation view',b:'Current multiple still prices significant future success. That can work if execution improves, but risk/reward is less forgiving than peers with steadier earnings quality.'},
+    {h:'Investor takeaway',b:'Keep TSLA as a higher-volatility satellite rather than a core weight. Use strict position sizing and predefined risk rules so decisions are driven by evidence, not narrative swings.'}
+  ],
+  'BRK.B':[
+    {h:'Business model & moat',b:'Berkshire\'s moat is diversified: insurance float, disciplined capital allocation, and durable operating businesses. This combination supports downside resilience when markets become unstable.'},
+    {h:'Financial resilience',b:'Large liquidity and conservative leverage provide strong shock absorption. For non-specialist investors, this means BRK.B can stay opportunistic in downturns while many others become defensive.'},
+    {h:'Growth drivers (next 3-5 years)',b:'Returns are likely to come from steady compounding, insurance earnings, and opportunistic deployment of cash during dislocations rather than rapid multiple expansion.'},
+    {h:'Risk map & what to monitor',b:'Monitor underwriting cycle quality, acquisition discipline, and leadership transition execution. Compared with high-growth names, structural disruption risk remains lower.'},
+    {h:'Valuation view',b:'Valuation is generally reasonable for a defensive compounder with optionality. It is less likely to lead in speculative rallies, but often provides valuable portfolio stability in uncertain regimes.'},
+    {h:'Investor takeaway',b:'Use BRK.B as a ballast and dry-powder proxy. Its role is portfolio resilience and smoother compounding, especially when other holdings carry higher valuation or policy sensitivity.'}
+  ]
+};
+var PARETO_TICKERS=['NVDA','TSLA'];
+var STRATEGY_PARETO_DEEP={
+  'NVDA':[
+    {h:'Position thesis update',b:'The core thesis remains strong, but position size now matters more than direction. Keeping NVDA as a large core can still work; the improvement is to reduce excess weight so one headline does not dominate total portfolio outcomes.'},
+    {h:'Action framework',b:'Preferred plan is a staged trim into relative-strength windows, rotating proceeds into high-conviction underweights. This preserves upside participation while improving diversification and lowering stress in down weeks.'},
+    {h:'Decision triggers',b:'Increase de-risking pace if estimate revisions flatten, export-control risk rises, or gross-margin guidance softens. Maintain core exposure if revisions remain positive and guidance quality stays intact.'}
+  ],
+  'TSLA':[
+    {h:'Position thesis update',b:'Thesis is now optionality-heavy rather than execution-confirmed. The name can still create upside, but confidence is lower until evidence of margin and demand stabilization becomes consistent.'},
+    {h:'Action framework',b:'Treat TSLA as a tactical position with hard risk limits. Avoid averaging down without fresh fundamental confirmation. Capital is usually better deployed to names with stronger earnings visibility until trend quality improves.'},
+    {h:'Decision triggers',b:'Tighten risk if delivery quality weakens again, price cuts deepen, or guidance resets lower. Consider adding only after two conditions align: improving operating metrics and stronger forward guidance credibility.'}
+  ]
+};
+var esppDecision='pending';
+
+function parseChangePct(v){
+  if(!v)return 0;
+  return parseFloat(String(v).replace('%','').replace('−','-'))||0;
+}
+
+function formatSignedPct(v,dec){
+  var n=Math.abs(v).toFixed(dec||2);
+  return (v>=0?'+':'−')+n+'%';
+}
+
+function getAverageMeta(periodKey,totalRet){
+  var ret=parseChangePct(totalRet);
+  if(periodKey==='1Y'){return {avg:'avg '+formatSignedPct(ret,2)+' YoY',label:'vs 1Y ago'};}
+  if(periodKey==='3Y'){
+    var cagr3=(Math.pow(1+(ret/100),1/3)-1)*100;
+    return {avg:'avg '+formatSignedPct(cagr3,2)+' YoY',label:'3Y CAGR'};
+  }
+  if(periodKey==='MTD'){return {avg:'avg '+formatSignedPct(ret,2)+' MoM',label:'vs last month'};}
+  if(periodKey==='YTD'){
+    var m=Math.max((PERIOD_DATA[periodKey].chart.labels||[]).length,1);
+    return {avg:'avg '+formatSignedPct(ret/m,2)+' MoM',label:'YTD'};
+  }
+  if(periodKey==='ALL'){
+    var years=1.25;
+    var cagrAll=(Math.pow(1+(ret/100),1/years)-1)*100;
+    return {avg:'avg '+formatSignedPct(cagrAll,2)+' YoY',label:'since Jan 2025'};
+  }
+  if(periodKey==='1W'){return {avg:'avg '+formatSignedPct(ret/5,2)+'/day',label:'vs last week'};}
+  return {avg:'avg '+formatSignedPct(ret,2)+'/day',label:'vs yesterday'};
+}
+
+function getOrCreateFloatingTooltip(id){
+  var el=document.getElementById(id);
+  if(el)return el;
+  el=document.createElement('div');
+  el.id=id;
+  el.className='chart-float-tooltip';
+  document.body.appendChild(el);
+  return el;
+}
+
+function sparkExternalTooltip(context){
+  var model=context.tooltip;
+  var tip=getOrCreateFloatingTooltip('spark-float-tooltip');
+  if(!model||model.opacity===0){
+    tip.style.opacity=0;
+    return;
+  }
+  var point=model.dataPoints&&model.dataPoints[0];
+  if(!point){
+    tip.style.opacity=0;
+    return;
+  }
+  var rect=context.chart.canvas.getBoundingClientRect();
+  var ticker=context.chart.$ticker||'';
+  tip.textContent=ticker+' $'+point.parsed.y.toFixed(2)+' · '+point.label;
+  tip.style.left=(rect.left+model.caretX)+'px';
+  tip.style.top=(rect.top+model.caretY)+'px';
+  tip.style.opacity=1;
+}
+
+function initAllocationHover(){
+  var segs=document.querySelectorAll('.alloc-seg');
+  if(!segs.length)return;
+  var tip=getOrCreateFloatingTooltip('alloc-float-tooltip');
+  segs.forEach(function(seg){
+    seg.addEventListener('mousemove',function(e){
+      var label=seg.getAttribute('data-label')||'';
+      var value=seg.getAttribute('data-value')||'';
+      var weight=seg.getAttribute('data-weight')||'';
+      tip.textContent=label+' · S$'+value+' ('+weight+')';
+      tip.style.left=e.clientX+'px';
+      tip.style.top=e.clientY+'px';
+      tip.style.opacity=1;
+    });
+    seg.addEventListener('mouseenter',function(){tip.style.opacity=1;});
+    seg.addEventListener('mouseleave',function(){tip.style.opacity=0;});
+  });
+}
+
+function makeSparkSeries(price,pct,points){
+  points=Math.max(points||8,2);
+  var start=price/(1+(pct/100));
+  var values=[];
+  for(var i=0;i<points;i++){
+    var w=(Math.sin(i*1.7)*0.22)+(Math.cos(i*0.9)*0.08);
+    var drift=(price-start)*(i/(points-1));
+    values.push(parseFloat((start+drift+(price*0.0025*w)).toFixed(2)));
+  }
+  return values;
+}
+
+function buildChart(periodKey){
+  var d=PERIOD_DATA[periodKey];
+  var ctx=document.getElementById('perfChart');
+  var w=ctx.parentElement.clientWidth-32;
+  ctx.width=w;ctx.height=140;
+  if(perfChart){perfChart.destroy();}
+  var portData=chartMode==='pct'?d.chart.port:d.chart.port.map(function(v){return Math.round(48210*(1+v/100));});
+  var qqqData=chartMode==='pct'?d.chart.qqq:d.chart.qqq.map(function(v){return Math.round(48210*(1+v/100));});
+  var spyData=chartMode==='pct'?d.chart.spy:d.chart.spy.map(function(v){return Math.round(48210*(1+v/100));});
+  perfChart=new Chart(ctx,{
+    type:'line',
+    data:{
+      labels:d.chart.labels,
+      datasets:[
+        {label:'Portfolio',data:portData,borderColor:'#00c87a',borderWidth:1.5,pointRadius:0,tension:0.4,fill:false},
+        {label:'QQQ',data:qqqData,borderColor:'#4a9eff',borderWidth:1,pointRadius:0,tension:0.4,fill:false},
+        {label:'SPY',data:spyData,borderColor:'#5c6278',borderWidth:1,pointRadius:0,tension:0.4,fill:false,borderDash:[3,3]}
+      ]
+    },
+    options:{
+      responsive:false,animation:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{
+        backgroundColor:'#1a1e28',borderColor:'#2a2f3d',borderWidth:0.5,
+        titleColor:'#9aa0b4',bodyColor:'#e8eaf0',
+        titleFont:{family:'IBM Plex Mono',size:9},bodyFont:{family:'IBM Plex Mono',size:10},
+        callbacks:{label:function(c){return c.dataset.label+' (Y): '+(chartMode==='pct'?c.parsed.y.toFixed(2)+'%':'S$'+c.parsed.y.toLocaleString());}}
+      }},
+      scales:{
+        x:{grid:{color:'#1a1e28',borderColor:'#2a2f3d'},ticks:{color:'#5c6278',font:{family:'IBM Plex Mono',size:9}}},
+        y:{grid:{color:'#1a1e28',borderColor:'#2a2f3d'},ticks:{color:'#5c6278',font:{family:'IBM Plex Mono',size:9},callback:function(v){return chartMode==='pct'?v.toFixed(1)+'%':'S$'+Math.round(v/1000)+'K';}}}
+      }
+    }
+  });
+}
+
+function buildSparklines(periodKey){
+  var d=PERIOD_DATA[periodKey];
+  var tickers=['nvda','aapl','v','tsla','brkb'];
+  var labels=d.chart.labels;
+  tickers.forEach(function(t){
+    var c=document.getElementById('spark-'+t);
+    if(!c)return;
+    c.width=110;
+    c.height=26;
+    var pct=parseChangePct(d.diag[t]);
+    var values=makeSparkSeries(CURRENT_PRICES[t],pct,labels.length);
+    if(sparkCharts[t]){sparkCharts[t].destroy();}
+    sparkCharts[t]=new Chart(c,{
+      type:'line',
+      data:{
+        labels:labels,
+        datasets:[{
+          data:values,
+          borderColor:pct>=0?'#00c87a':'#ff4d4d',
+          borderWidth:1.2,
+          pointRadius:0,
+          pointHoverRadius:2.5,
+          pointHoverBackgroundColor:pct>=0?'#00c87a':'#ff4d4d',
+          tension:0.35,
+          fill:false
+        }]
+      },
+      options:{
+        responsive:false,
+        animation:false,
+        interaction:{mode:'index',intersect:false},
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            enabled:false,
+            external:sparkExternalTooltip
+          }
+        },
+        scales:{
+          x:{display:false},
+          y:{display:false}
+        }
+      }
+    });
+    sparkCharts[t].$ticker=t==='brkb'?'BRK.B':t.toUpperCase();
+  });
+}
+
+function setPeriod(k,btn){
+  currentPeriod=k;
+  document.querySelectorAll('.pb').forEach(b=>b.classList.remove('active'));
+  if(btn){btn.classList.add('active');}
+  var d=PERIOD_DATA[k];
+  var avgMeta=getAverageMeta(k,d.ret);
+  document.getElementById('m-pl').textContent=d.port;
+  document.getElementById('m-ret').textContent=d.ret;
+  document.getElementById('m-avg-ret').textContent=avgMeta.avg;
+  document.getElementById('m-ret-label').textContent=avgMeta.label;
+  document.getElementById('chart-period-label').textContent='Portfolio vs benchmarks · '+d.label;
+  var stockPeriodLabels={'1D':'1D chg','1W':'1W chg','MTD':'MTD','YTD':'YTD','1Y':'1Y','3Y':'3Y','ALL':'ALL'};
+  document.getElementById('stock-period-lbl').textContent=stockPeriodLabels[k]||k;
+  document.getElementById('chg-header').textContent=stockPeriodLabels[k]||'Chg';
+  var diag=d.diag;
+  ['nvda','aapl','v','tsla','brkb'].forEach(function(t){
+    var val=diag[t];
+    var pct=parseChangePct(val);
+    var dCell=document.getElementById('d-'+t);
+    var sCell=document.getElementById('sp-'+t);
+    var tone=pct>0?'pos':pct<0?'neg':'neu';
+    if(dCell){dCell.textContent=val;dCell.className='dc '+tone;}
+    if(sCell){sCell.textContent=val;sCell.className=tone;}
+  });
+  buildChart(k);
+  buildSparklines(k);
+}
+
+function setChartMode(mode,btn){
+  chartMode=mode;
+  document.querySelectorAll('.ct-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  buildChart(currentPeriod);
+}
+
+function switchTab(name,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+  var tip=document.getElementById('spark-float-tooltip');
+  if(tip){tip.style.opacity=0;}
+  var allocTip=document.getElementById('alloc-float-tooltip');
+  if(allocTip){allocTip.style.opacity=0;}
+}
+function showConfirm(k){
+  var el=document.getElementById('confirm-'+k);
+  if(!el)return;
+  el.style.display=el.style.display==='block'?'none':'block';
+}
+function hideConfirm(k){
+  var el=document.getElementById('confirm-'+k);
+  if(el){el.style.display='none';}
+}
+function formatRunTime(){
+  var n=new Date();
+  var d=n.toLocaleDateString('en-SG',{weekday:'short',day:'2-digit',month:'short'});
+  var t=n.toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit',hour12:false});
+  return d+' '+t;
+}
+function setRunChip(id,modeLabel){
+  var el=document.getElementById(id);
+  if(!el)return;
+  el.textContent='Last run: '+formatRunTime()+' · '+modeLabel;
+}
+function safeSendPrompt(prompt){
+  if(typeof window.sendPrompt==='function'){
+    window.sendPrompt(prompt);
+    return true;
+  }
+  console.info('Simulated agent call:',prompt);
+  return false;
+}
+function runFreeRefresh(layer){
+  if(layer==='intel'){
+    setIntelMode('full');
+    setRunChip('ts-intel','Free');
+    return;
+  }
+  if(layer==='strategy'){
+    var sFull=document.getElementById('strategy-full-content');
+    var sPareto=document.getElementById('strategy-pareto-panel');
+    if(sFull){sFull.style.display='block';}
+    if(sPareto){sPareto.classList.remove('visible');}
+    setRunChip('ts-strategy','Free');
+  }
+}
+function requestAiRefresh(layer){
+  var sel=document.getElementById(layer+'-ai-mode');
+  if(!sel)return;
+  if(layer==='intel'){hideConfirm('intel-full');hideConfirm('intel-pareto');}
+  if(layer==='strategy'){hideConfirm('strategy');hideConfirm('strategy-pareto');}
+  showConfirm(sel.value);
+}
+function renderParetoDeepDive(){
+  var intel=document.getElementById('intel-pareto-scorecard');
+  var paretoWrap=document.getElementById('holding-deepdive-pareto-wrap');
+  if(paretoWrap){paretoWrap.style.display='none';}
+  if(intel){
+    var source=document.querySelector('#intel-full-content .htable');
+    if(source){
+      var head=source.querySelector('thead');
+      var bodyRows=Array.prototype.slice.call(source.querySelectorAll('tbody tr')).filter(function(tr){
+        var tk=tr.querySelector('.h-ticker');
+        return tk&&PARETO_TICKERS.indexOf(tk.textContent.trim())>-1;
+      }).map(function(tr){return tr.outerHTML;}).join('');
+      if(head&&bodyRows){
+        intel.innerHTML='<div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rl);overflow-x:auto"><table class="htable">'+head.outerHTML+'<tbody>'+bodyRows+'</tbody></table></div>';
+        Array.prototype.slice.call(intel.querySelectorAll('tbody tr')).forEach(function(tr){
+          var tk=tr.querySelector('.h-ticker');
+          var btn=tr.querySelector('.deep-btn');
+          if(!tk||!btn)return;
+          var t=tk.textContent.trim().replace(/'/g,"\\'");
+          btn.setAttribute('onclick',"runHoldingDeepDivePareto('"+t+"')");
+        });
+      }
+    }
+  }
+  var strat=document.getElementById('strategy-pareto-deep');
+  if(strat){
+    strat.innerHTML=PARETO_TICKERS.map(function(t){
+      var cards=STRATEGY_PARETO_DEEP[t]||[];
+      var cardHtml=cards.map(function(c,idx){
+        return '<div class="sdeep-row"><div class="sdeep-num">'+(idx+1)+'</div><div><div class="sdeep-row-title">'+c.h+'</div><div class="sdeep-row-body">'+c.b+'</div></div></div>';
+      }).join('');
+      return '<div class="sdeep-stock"><div class="sdeep-stock-head"><div class="sdeep-stock-title">'+t+' — In-depth strategy focus</div><div class="sdeep-stock-sub">Pareto-selected</div></div>'+cardHtml+'</div>';
+    }).join('');
+    strat.className='sdeep-wrap';
+  }
+}
+function runAgent(k){
+  hideConfirm(k);
+  var p={
+    'intel-full':'Run a full Gemini Flash investor-framework report per stock with clear plain-language output: Overall Score, Valuation (Fwd P/E, PEG, under/over/fair), Financial Strength (profits, earnings quality, cash), Market Signal (analyst target), moat/risk context, and one integrated synthesis with practical watchpoints.',
+    'intel-pareto':'Run Gemini Flash Pareto analysis for the top 20% holdings driving ~80% of portfolio risk/return, then output the same full holdings scorecard rows and optional in-depth investor framework cards for those selected Pareto stocks only.',
+    'intel-macro':'Run Gemini Flash macro refresh — deliver a plain-language summary covering Fed, CPI/PCE, consumer fear-greed, sector rotation, and key event/geopolitical implications for this portfolio.',
+    'strategy':'Run the strategy agent in full mode and return comprehensive plain-language outputs: actionable recommendations, strategic verdict, conviction thesis ranking, and target portfolio rebalance table.',
+    'strategy-pareto':'Run the strategy agent in Pareto mode — return highest-impact summarized actions and focused in-depth strategy notes for each selected Pareto stock, written for non-specialist readability.'
+  };
+  if(k==='intel-pareto'){
+    setIntelMode('pareto');
+    setRunChip('ts-intel','Pareto AI');
+    renderParetoDeepDive();
+  }
+  if(k==='intel-full'){
+    setIntelMode('full');
+    setRunChip('ts-intel','Full AI');
+  }
+  if(k==='intel-macro'){
+    setRunChip('ts-intel','Macro AI');
+  }
+  if(k==='strategy'){
+    var sFull=document.getElementById('strategy-full-content');
+    var sPareto=document.getElementById('strategy-pareto-panel');
+    if(sFull){sFull.style.display='block';}
+    if(sPareto){sPareto.classList.remove('visible');}
+    setRunChip('ts-strategy','Full AI');
+  }
+  if(k==='strategy-pareto'){
+    var sFullOnly=document.getElementById('strategy-full-content');
+    var sParetoOnly=document.getElementById('strategy-pareto-panel');
+    if(sFullOnly){sFullOnly.style.display='none';}
+    if(sParetoOnly){sParetoOnly.classList.add('visible');}
+    setRunChip('ts-strategy','Pareto AI');
+    renderParetoDeepDive();
+  }
+  if(p[k]){
+    safeSendPrompt(p[k]);
+  }
+}
+function setIntelMode(mode){
+  var full=document.getElementById('intel-full-content');
+  var pareto=document.getElementById('intel-pareto-content');
+  if(!full||!pareto)return;
+  var isPareto=mode==='pareto';
+  full.style.display=isPareto?'none':'block';
+  pareto.style.display=isPareto?'block':'none';
+}
+function runHoldingDeepDive(ticker){
+  var wrap=document.getElementById('holding-deepdive-wrap');
+  var title=document.getElementById('holding-deepdive-title');
+  var grid=document.getElementById('holding-deepdive-grid');
+  var cards=HOLDING_DEEP_DIVE[ticker];
+  if(!wrap||!title||!grid||!cards){return;}
+  title.textContent=ticker+' — In-depth investor framework report';
+  grid.innerHTML=cards.map(function(c){
+    return '<div class="deep-card"><div class="deep-head">'+c.h+'</div><div class="deep-body">'+c.b+'</div></div>';
+  }).join('');
+  wrap.style.display='block';
+}
+function runHoldingDeepDivePareto(ticker){
+  var wrap=document.getElementById('holding-deepdive-pareto-wrap');
+  var title=document.getElementById('holding-deepdive-pareto-title');
+  var grid=document.getElementById('holding-deepdive-pareto-grid');
+  var cards=HOLDING_DEEP_DIVE[ticker];
+  if(!wrap||!title||!grid||!cards){return;}
+  title.textContent=ticker+' — In-depth investor framework report';
+  grid.innerHTML=cards.map(function(c){
+    return '<div class="deep-card"><div class="deep-head">'+c.h+'</div><div class="deep-body">'+c.b+'</div></div>';
+  }).join('');
+  wrap.style.display='block';
+}
+function showTradeESPPConfirm(show){
+  var el=document.getElementById('confirm-espp-v');
+  if(el){el.style.display=show?'block':'none';}
+}
+function handleTickerInput(){
+  var input=document.getElementById('t-ticker');
+  var ticker=(input.value||'').toUpperCase().trim();
+  input.value=ticker;
+  var type=(document.getElementById('t-type').value||'BUY');
+  if(ticker!=='V'||type!=='BUY'){
+    esppDecision='pending';
+    showTradeESPPConfirm(false);
+    return;
+  }
+  if(esppDecision==='pending'){
+    showTradeESPPConfirm(true);
+  }
+}
+function approveTradeESPP(){
+  esppDecision='approved';
+  showTradeESPPConfirm(false);
+}
+function skipTradeESPP(){
+  esppDecision='skipped';
+  showTradeESPPConfirm(false);
+}
+function addTrade(){
+  var ticker=document.getElementById('t-ticker').value.toUpperCase().trim();
+  var type=document.getElementById('t-type').value;
+  var shares=parseFloat(document.getElementById('t-shares').value);
+  var price=parseFloat(document.getElementById('t-price').value);
+  var dateRaw=(document.getElementById('t-date').value||'').trim();
+  if(!ticker||!shares||!price)return;
+  if(ticker==='V'&&type==='BUY'&&esppDecision==='pending'){
+    showTradeESPPConfirm(true);
+    return;
+  }
+  if(ticker==='V'&&type==='BUY'&&esppDecision==='approved'){
+    price=parseFloat((price*0.85).toFixed(2));
+  }
+  var d=dateRaw?new Date(dateRaw+'T12:00:00'):new Date();
+  if(isNaN(d.getTime())){d=new Date();}
+  var dateStr=d.toLocaleDateString('en-SG',{day:'numeric',month:'short',year:'numeric'});
+  var tbody=document.getElementById('trade-tbody');var row=tbody.insertRow(0);
+  var bh=type==='BUY'?'<span class="type-badge buy-b">BUY</span>':'<span class="type-badge sell-b">SELL</span>';
+  row.innerHTML='<td>'+ticker+'</td><td>'+bh+'</td><td>'+shares.toFixed(2)+'</td><td>$'+price.toFixed(2)+'</td><td>'+dateStr+'</td><td>$'+Math.round(shares*price).toLocaleString()+'</td><td><button class="del-btn" onclick="delTrade(this)">✕</button></td>';
+  document.getElementById('t-ticker').value='';document.getElementById('t-shares').value='';document.getElementById('t-price').value='';document.getElementById('t-date').value='';
+  esppDecision='pending';
+  showTradeESPPConfirm(false);
+  updateCosts();
+}
+function delTrade(btn){btn.closest('tr').remove();updateCosts();}
+function updateCosts(){
+  var marketDays=22;
+  var intelParetoDaily=0.003;
+  var intelMacroDaily=0.001;
+  var intelFullWeekly=0.005;
+  var strategyParetoWeekly=0.007;
+  var strategyFullWeekly=0.012;
+  var weeklyEmailDigest=0.003;
+  var i=(marketDays*(intelParetoDaily+intelMacroDaily)+(intelFullWeekly*4));
+  var s=((strategyParetoWeekly+strategyFullWeekly)*4);
+  var e=(weeklyEmailDigest*4);
+  document.getElementById('c-intel').textContent='S$'+i.toFixed(2);
+  document.getElementById('c-strat').textContent='S$'+s.toFixed(2);
+  document.getElementById('c-email').textContent='S$'+e.toFixed(2);
+  document.getElementById('c-total').textContent='S$'+(i+s+e).toFixed(2)+'/mo';
+}
+var now=new Date();
+var ts=now.toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit'})+' SGT · '+now.toLocaleDateString('en-SG',{day:'numeric',month:'short',year:'numeric'});
+document.getElementById('open-ts').textContent='Opened '+ts;
+document.getElementById('nav-ts').textContent=ts;
+document.getElementById('ts-overview').textContent='Loaded '+ts;
+initAllocationHover();
+setIntelMode('full');
+showTradeESPPConfirm(false);
+renderParetoDeepDive();
+updateCosts();
+setTimeout(function(){setPeriod('1D',document.querySelector('.pb.active'));},100);
+</script>
