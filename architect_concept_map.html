@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architect — Concept Map</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --color-background-primary:#ffffff;
+    --color-background-secondary:#f7f7f5;
+    --color-text-primary:#1a1a1a;
+    --color-text-secondary:#6b6b68;
+    --color-text-tertiary:#9c9a92;
+    --color-border-tertiary:rgba(0,0,0,0.12);
+    --color-border-secondary:rgba(0,0,0,0.2);
+    --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  }
+  @media(prefers-color-scheme:dark){
+    :root{
+      --color-background-primary:#1a1a1a;
+      --color-background-secondary:#222220;
+      --color-text-primary:#e8e8e4;
+      --color-text-secondary:#9c9a92;
+      --color-text-tertiary:#6b6b68;
+      --color-border-tertiary:rgba(255,255,255,0.1);
+      --color-border-secondary:rgba(255,255,255,0.18);
+    }
+  }
+  body{
+    font-family:var(--font-sans);
+    background:var(--color-background-secondary);
+    color:var(--color-text-primary);
+    min-height:100vh;
+  }
+  #app{
+    max-width:900px;
+    margin:0 auto;
+    background:var(--color-background-primary);
+    border-left:0.5px solid var(--color-border-tertiary);
+    border-right:0.5px solid var(--color-border-tertiary);
+    min-height:100vh;
+  }
+  #header{
+    padding:16px 16px 0;
+    border-bottom:0.5px solid var(--color-border-tertiary);
+  }
+  #header h1{
+    font-size:15px;
+    font-weight:500;
+    color:var(--color-text-primary);
+    margin-bottom:10px;
+  }
+  #header p{
+    font-size:12px;
+    color:var(--color-text-secondary);
+    margin-bottom:12px;
+    line-height:1.5;
+  }
+  #toolbar{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+    padding-bottom:10px;
+  }
+  #toolbar span{
+    font-size:11px;
+    color:var(--color-text-secondary);
+  }
+  .filter-btn{
+    font-size:11px;
+    padding:3px 9px;
+    border-radius:20px;
+    border:0.5px solid var(--color-border-secondary);
+    background:var(--color-background-primary);
+    color:var(--color-text-secondary);
+    cursor:pointer;
+    transition:all .15s;
+  }
+  .filter-btn.active,.filter-btn:hover{
+    background:var(--color-background-secondary);
+    color:var(--color-text-primary);
+  }
+  #search{
+    font-size:12px;
+    padding:3px 8px;
+    border-radius:6px;
+    border:0.5px solid var(--color-border-secondary);
+    background:var(--color-background-primary);
+    color:var(--color-text-primary);
+    width:140px;
+    outline:none;
+  }
+  #canvas-wrap{
+    position:relative;
+    overflow:hidden;
+    background:var(--color-background-primary);
+    height:560px;
+  }
+  canvas{
+    display:block;
+    cursor:grab;
+  }
+  canvas.dragging{cursor:grabbing}
+  #tooltip{
+    position:absolute;
+    pointer-events:none;
+    background:var(--color-background-primary);
+    border:0.5px solid var(--color-border-secondary);
+    border-radius:8px;
+    padding:10px 12px;
+    max-width:240px;
+    box-shadow:0 2px 12px rgba(0,0,0,.1);
+    z-index:10;
+    display:none;
+  }
+  #tt-term{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+  #tt-def{font-size:12px;color:var(--color-text-secondary);line-height:1.5}
+  #tt-module{font-size:11px;margin-top:5px}
+  #legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    padding:8px 16px;
+    border-top:0.5px solid var(--color-border-tertiary);
+    background:var(--color-background-primary);
+  }
+  .leg-item{
+    display:flex;
+    align-items:center;
+    gap:4px;
+    font-size:11px;
+    color:var(--color-text-secondary);
+  }
+  .leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  #hint{
+    font-size:11px;
+    color:var(--color-text-tertiary);
+    padding:6px 16px 10px;
+    text-align:center;
+    background:var(--color-background-primary);
+    border-top:0.5px solid var(--color-border-tertiary);
+  }
+  #detail-panel{
+    display:none;
+    padding:16px;
+    border-top:0.5px solid var(--color-border-tertiary);
+    background:var(--color-background-secondary);
+  }
+  #detail-panel.visible{display:block}
+  #dp-term{font-size:15px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px}
+  #dp-def{font-size:13px;color:var(--color-text-secondary);line-height:1.7;margin-bottom:8px}
+  #dp-module{font-size:11px;color:var(--color-text-tertiary)}
+  #dp-connections{font-size:12px;color:var(--color-text-secondary);margin-top:8px}
+  #dp-connections strong{color:var(--color-text-primary);font-weight:500}
+  #dp-close{float:right;background:none;border:none;cursor:pointer;font-size:14px;color:var(--color-text-tertiary);padding:0}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="header">
+    <h1>Architect — Concept Map</h1>
+    <p>All 60+ concepts from the 20-email curriculum. Hover to define. Drag to pan. Scroll to zoom. Click any node to see its full definition and connections below.</p>
+    <div id="toolbar">
+      <span>Filter:</span>
+      <button class="filter-btn active" data-mod="all">All</button>
+      <button class="filter-btn" data-mod="1">M1 · Networking</button>
+      <button class="filter-btn" data-mod="2">M2 · Frontend/Cloud</button>
+      <button class="filter-btn" data-mod="3">M3 · Databases</button>
+      <button class="filter-btn" data-mod="4">M4 · APIs</button>
+      <button class="filter-btn" data-mod="5">M5 · Architecture</button>
+      <button class="filter-btn" data-mod="6">M6 · Security</button>
+      <button class="filter-btn" data-mod="7">M7 · Payments</button>
+      <button class="filter-btn" data-mod="8">M8 · Mobile</button>
+      <button class="filter-btn" data-mod="9">M9 · Analytics</button>
+      <button class="filter-btn" data-mod="10">M10 · AI/ML</button>
+      <button class="filter-btn" data-mod="11">M11 · PRDs</button>
+      <input id="search" placeholder="Search term..." oninput="onSearch(this.value)">
+    </div>
+  </div>
+
+  <div id="canvas-wrap">
+    <canvas id="c"></canvas>
+    <div id="tooltip">
+      <div id="tt-term"></div>
+      <div id="tt-def"></div>
+      <div id="tt-module"></div>
+    </div>
+  </div>
+
+  <div id="legend"></div>
+
+  <div id="hint">Hover to define · Drag to pan · Scroll to zoom · Click a node for full detail below</div>
+
+  <div id="detail-panel">
+    <button id="dp-close" onclick="closeDetail()">✕</button>
+    <div id="dp-term"></div>
+    <div id="dp-def"></div>
+    <div id="dp-module"></div>
+    <div id="dp-connections"></div>
+  </div>
+
+</div>
+
+<script>
+const MODULES = [
+  {id:1,  label:"M1 · Networking",     color:"#378ADD", light:"#E6F1FB", dark:"#0C447C"},
+  {id:2,  label:"M2 · Frontend/Cloud", color:"#1D9E75", light:"#E1F5EE", dark:"#085041"},
+  {id:3,  label:"M3 · Databases",      color:"#7F77DD", light:"#EEEDFE", dark:"#3C3489"},
+  {id:4,  label:"M4 · APIs",           color:"#D85A30", light:"#FAECE7", dark:"#712B13"},
+  {id:5,  label:"M5 · Architecture",   color:"#D4537E", light:"#FBEAF0", dark:"#72243E"},
+  {id:6,  label:"M6 · Security",       color:"#BA7517", light:"#FAEEDA", dark:"#633806"},
+  {id:7,  label:"M7 · Payments",       color:"#185FA5", light:"#E6F1FB", dark:"#042C53"},
+  {id:8,  label:"M8 · Mobile",         color:"#639922", light:"#EAF3DE", dark:"#27500A"},
+  {id:9,  label:"M9 · Analytics",      color:"#E24B4A", light:"#FCEBEB", dark:"#791F1F"},
+  {id:10, label:"M10 · AI/ML",         color:"#888780", light:"#F1EFE8", dark:"#444441"},
+  {id:11, label:"M11 · PRDs",          color:"#3B8BD4", light:"#E6F1FB", dark:"#0C447C"},
+];
+
+const NODES = [
+  // M1
+  {id:"client",         mod:1,  label:"Client",                  def:"A device or app that sends requests. Your browser, mobile app, or a server calling another server's API.", x:120,  y:120},
+  {id:"server",         mod:1,  label:"Server",                  def:"A machine that receives requests, processes them, and returns responses. Where business logic and data live.", x:260,  y:90},
+  {id:"http",           mod:1,  label:"HTTP/HTTPS",              def:"The protocol for requests and responses. HTTPS adds TLS encryption — mandatory for any product handling user data.", x:190,  y:180},
+  {id:"dns",            mod:1,  label:"DNS",                     def:"Translates domain names (visa.com) into IP addresses. The internet's phone book — also used by CDNs to route users to nearest servers.", x:80,   y:220},
+  {id:"latency",        mod:1,  label:"Latency",                 def:"Round-trip time from request to response, in milliseconds. Visa's auth SLA: sub-300ms. You set latency targets in PRDs as p99 values.", x:320,  y:160},
+  {id:"idempotency",    mod:1,  label:"Idempotency",             def:"An operation that produces the same result no matter how many times it's repeated. Essential for payments — prevents duplicate charges on retried requests.", x:370,  y:220},
+  {id:"status_code",    mod:1,  label:"Status Code",             def:"A number in the HTTP response indicating success (2xx), client error (4xx), or server error (5xx). 200=OK, 404=Not Found, 500=Server Error.", x:200,  y:250},
+  // M2
+  {id:"frontend",       mod:2,  label:"Frontend",                def:"Code running on the user's device. Handles UI and interaction. Never put secrets, pricing logic, or security checks here.", x:500,  y:80},
+  {id:"backend",        mod:2,  label:"Backend",                 def:"Code running on your servers. Handles data, business logic, auth, integrations. Users never see this code.", x:620,  y:120},
+  {id:"cdn",            mod:2,  label:"CDN",                     def:"Content Delivery Network. Caches static assets (images, CSS, JS) on servers near users globally. Reduces latency and origin server load.", x:500,  y:180},
+  {id:"cloud",          mod:2,  label:"Cloud",                   def:"Renting compute from AWS, Google Cloud, or Azure. Pay-as-you-go, elastic scaling. Visa uses hybrid: private cloud for compliance, public for scale.", x:640,  y:200},
+  {id:"iaas",           mod:2,  label:"IaaS",                    def:"Infrastructure as a Service. Raw virtual machines. You manage OS and apps. Example: AWS EC2. Most control, most responsibility.", x:570,  y:270},
+  {id:"paas",           mod:2,  label:"PaaS",                    def:"Platform as a Service. Managed runtime — just deploy code. Platform handles servers and scaling. Example: Heroku, Google App Engine.", x:680,  y:270},
+  {id:"saas",           mod:2,  label:"SaaS",                    def:"Software as a Service. Ready-to-use software, no infrastructure to manage. Example: Salesforce, Slack, Gmail.", x:625,  y:340},
+  // M3
+  {id:"sql",            mod:3,  label:"SQL / Relational",        def:"Stores data in tables with fixed schemas. ACID transactions guarantee reliability. Core of Visa's transaction ledger. Use when data integrity is critical.", x:120,  y:390},
+  {id:"acid",           mod:3,  label:"ACID",                    def:"Atomicity, Consistency, Isolation, Durability. Guarantees for DB transactions. Atomicity = all-or-nothing. Critical for payments — no partial writes.", x:60,   y:460},
+  {id:"nosql",          mod:3,  label:"NoSQL",                   def:"Non-relational databases. Flexible schema, horizontal scale. Types: document (MongoDB), key-value (Redis), wide-column (Cassandra), graph (Neo4j).", x:230,  y:430},
+  {id:"caching",        mod:3,  label:"Caching",                 def:"Storing frequently-read data in fast memory (RAM) to skip the database. Redis is the standard tool. Introduces staleness risk — never cache real-time balances.", x:180,  y:500},
+  {id:"consistency",    mod:3,  label:"Eventual Consistency",    def:"Updates propagate asynchronously — reads may briefly return stale data. Acceptable for social feeds. Never acceptable for payment status or account balances.", x:320,  y:480},
+  {id:"scaling_h",      mod:3,  label:"Horizontal Scaling",      def:"Adding more servers to handle load. NoSQL databases are designed for this. Standard cloud pattern. Contrasts with vertical scaling (bigger server).", x:280,  y:360},
+  // M4
+  {id:"api",            mod:4,  label:"API",                     def:"Application Programming Interface. A contract defining how one system talks to another. The API IS the product when you're building a platform like Visa Developer.", x:480,  y:390},
+  {id:"rest",           mod:4,  label:"REST",                    def:"API style using HTTP methods (GET/POST/PUT/DELETE) on resource URLs. Stateless, returns JSON. Most common. Cacheable. Visa Direct uses REST.", x:420,  y:460},
+  {id:"graphql",        mod:4,  label:"GraphQL",                 def:"Query language for APIs. Clients specify exactly what data they need — no over-fetching. Best for products with multiple client types (web, mobile, partners).", x:540,  y:460},
+  {id:"webhook",        mod:4,  label:"Webhook",                 def:"Server pushes events to you when something happens — instead of you polling. Used for payment completion, fraud alerts. Must handle retries and duplicates.", x:630,  y:430},
+  {id:"sdk",            mod:4,  label:"SDK",                     def:"Software Development Kit. Wraps raw API calls in a language-specific library. Lowers integration barrier for partners. Visa Direct has SDKs in Java, Python, Node.js.", x:480,  y:520},
+  {id:"versioning",     mod:4,  label:"API Versioning",          def:"Maintaining backward-compatible API releases (/v1/, /v2/). Changing an API without versioning breaks existing partner integrations. Announce deprecations 6-12 months early.", x:640,  y:500},
+  // M5
+  {id:"monolith",       mod:5,  label:"Monolith",                def:"All components in one deployable unit. Simple to start, but a bug anywhere can crash everything. Right for early-stage products — wrong when teams scale.", x:100,  y:620},
+  {id:"microservices",  mod:5,  label:"Microservices",           def:"Independent services each owning one business capability. Independent scaling and deployment. Required operational maturity. Visa: auth, fraud, settlement are separate services.", x:270,  y:590},
+  {id:"event_driven",   mod:5,  label:"Event-Driven",            def:"Services communicate via published events, not direct calls. PaymentAuthorised event triggers fraud, settlement, and notifications independently. Kafka, RabbitMQ, AWS SQS.", x:200,  y:670},
+  {id:"circuit_breaker",mod:5,  label:"Circuit Breaker",         def:"Stops calling a failing service after repeated failures. Prevents cascade failures — if fraud scoring is down, don't keep hammering it. Core resilience pattern.", x:360,  y:650},
+  {id:"queue",          mod:5,  label:"Message Queue",           def:"Buffer that holds events between producers and consumers. Events persist even if consumers are temporarily down. Kafka is the standard at Visa scale.", x:300,  y:720},
+  {id:"graceful_deg",   mod:5,  label:"Graceful Degradation",    def:"When a dependency fails, fall back to reduced functionality instead of full outage. 'If fraud service is down, allow low-risk transactions with manual review flag.'", x:120,  y:710},
+  // M6
+  {id:"authn",          mod:6,  label:"Authentication",          def:"Verifying who you are. Happens at login. Separate from authorisation — you need both. Showing your passport at the airport.", x:530,  y:610},
+  {id:"authz",          mod:6,  label:"Authorisation",           def:"Verifying what you're allowed to do. Happens on every action. Missing authorisation checks are how most data breaches happen.", x:645,  y:570},
+  {id:"jwt",            mod:6,  label:"JWT",                     def:"JSON Web Token. Self-contained, signed token encoding user claims (ID, role, expiry). Stateless — server verifies signature without a DB lookup. Used for Visa partner API auth.", x:660,  y:640},
+  {id:"oauth",          mod:6,  label:"OAuth 2.0",               def:"Delegated access protocol. Lets users grant third-party apps access to their data without sharing credentials. 'Login with Google'. Used by Plaid, Slack, and Visa's partner integrations.", x:520,  y:690},
+  {id:"encryption",     mod:6,  label:"Encryption",              def:"At rest: data in databases encrypted (AES-256). In transit: HTTPS/TLS. Hashing is one-way for passwords (bcrypt/Argon2) — you can't reverse it.", x:660,  y:710},
+  {id:"pci",            mod:6,  label:"PCI-DSS",                 def:"Payment Card Industry Data Security Standard. Mandatory for handling card data. Never store CVV. Encrypt/tokenise PANs. Control and log all access to card data.", x:570,  y:760},
+  // M7
+  {id:"auth_pay",       mod:7,  label:"Authorisation (Pay)",     def:"Real-time approval — issuer says yes or no in under 300ms. Funds reserved, not moved. Distinct from capture/settlement. The first of 3 payment phases.", x:120,  y:830},
+  {id:"clearing",       mod:7,  label:"Clearing",                def:"Hours after auth — issuer and acquirer formally exchange transaction details. The second payment phase.", x:245,  y:880},
+  {id:"settlement",     mod:7,  label:"Settlement",              def:"Actual movement of funds. 1–3 business days after auth. Merchants receive money here, not at auth. Show both pending auth AND settled amounts in merchant dashboards.", x:370,  y:850},
+  {id:"issuer",         mod:7,  label:"Issuer",                  def:"The cardholder's bank (e.g. DBS, Chase). Approves/declines transactions. Earns interchange fees. Bears fraud liability.", x:100,  y:920},
+  {id:"acquirer",       mod:7,  label:"Acquirer",                def:"The merchant's bank. Processes card payments on the merchant's behalf. Pays interchange to the issuer. Settles funds to the merchant.", x:250,  y:950},
+  {id:"scheme",         mod:7,  label:"Card Scheme",             def:"Visa, Mastercard. Operates the network connecting issuers and acquirers. Sets rules, facilitates communication, guarantees settlement. Does not hold funds.", x:390,  y:920},
+  {id:"gateway",        mod:7,  label:"Payment Gateway",         def:"Merchant's technical interface to the payment network. Stripe, Adyen. Connects checkout to acquiring network. Routes transactions and handles responses.", x:490,  y:870},
+  {id:"interchange",    mod:7,  label:"Interchange",             def:"Fee paid by acquirer to issuer per transaction (typically 0.05–2.4%). Set by the card scheme. Largest component of merchant payment costs.", x:390,  y:980},
+  // M8
+  {id:"native",         mod:8,  label:"Native App",              def:"Built for one platform (iOS/Android). Full hardware access: FaceID, NFC, GPS. Best performance. Two codebases. App store review required.", x:580,  y:840},
+  {id:"cross_platform", mod:8,  label:"Cross-Platform",          def:"One codebase for iOS and Android (React Native, Flutter). Faster development, slightly below native ceiling. Right choice for most fintech MVPs.", x:690,  y:880},
+  {id:"pwa",            mod:8,  label:"PWA",                     def:"Progressive Web App. Installable web app that works offline. Supports push notifications. Ideal for emerging markets with limited storage.", x:580,  y:920},
+  {id:"feature_flag",   mod:8,  label:"Feature Flag",            def:"Toggle that shows/hides code in production without a new deployment. Enables safe phased rollouts: internal → 1% → 10% → 100%. Rollback = flip the flag.", x:690,  y:950},
+  {id:"ota",            mod:8,  label:"OTA Update",              def:"Over-the-Air update for React Native — push JS changes without app store re-submission. Binary changes still require store review.", x:640,  y:1000},
+  // M9
+  {id:"event_track",    mod:9,  label:"Event (Analytics)",       def:"A timestamped record that something happened: payment_initiated, payment_failed. Has properties: user_id, amount, merchant_id. Must be planned before launch.", x:120,  y:1050},
+  {id:"instrumentation",mod:9,  label:"Instrumentation",         def:"Adding code to emit analytics events. Frontend events = button clicks, screen views. Backend events = payment processed, fraud triggered. Define in PRD before build.", x:265,  y:1010},
+  {id:"pipeline",       mod:9,  label:"Data Pipeline",           def:"Events → collector → stream processor (Kafka) → data warehouse (Snowflake/BigQuery) → BI tools (Looker). Real-time pipelines needed for fraud and monitoring.", x:205,  y:1085},
+  {id:"north_star",     mod:9,  label:"North Star Metric",       def:"The single metric most correlated with delivering core product value. For Visa: 'successful payment transactions'. Everything else is a sub-metric.", x:365,  y:1045},
+  {id:"ab_test",        mod:9,  label:"A/B Test",                def:"Randomised experiment comparing control vs treatment. Only rigorous way to prove causation. Define primary metric and guardrails BEFORE running. Requires statistical significance.", x:345,  y:1120},
+  {id:"guardrail",      mod:9,  label:"Guardrail Metric",        def:"A metric you must not degrade while optimising the North Star. Don't improve conversion at the cost of fraud rate. Define before every experiment.", x:490,  y:1070},
+  // M10
+  {id:"ml",             mod:10, label:"Machine Learning",        def:"System learns patterns from labelled examples rather than explicit rules. Use when patterns are too complex to code manually and you have sufficient data.", x:605,  y:1040},
+  {id:"supervised",     mod:10, label:"Supervised Learning",     def:"Train on labelled data (input + expected output). Used for fraud detection (fraud/not-fraud labels), credit scoring, card recommendations.", x:565,  y:1100},
+  {id:"inference",      mod:10, label:"Inference",               def:"Using a trained model to make predictions on new inputs. Visa's fraud score runs inference in under 100ms within the 300ms auth window.", x:685,  y:1080},
+  {id:"prec_recall",    mod:10, label:"Precision / Recall",      def:"Precision = % of fraud flags that were real fraud (few false alarms). Recall = % of real fraud you caught (few misses). You can't maximise both — PM sets the threshold.", x:645,  y:1140},
+  {id:"data_drift",     mod:10, label:"Data Drift",              def:"When real-world data changes and the model's training data no longer matches reality. Models need periodic retraining. Budget for this ongoing cost.", x:545,  y:1170},
+  // M11
+  {id:"prd",            mod:11, label:"PRD",                     def:"Product Requirements Document. What (user stories), Why (business goals + metrics), Constraints (NFRs, security, API specs, rollout plan). Non-functional requirements are your responsibility.", x:200,  y:1210},
+  {id:"nfr",            mod:11, label:"NFRs",                    def:"Non-Functional Requirements: latency (p99 < 300ms), availability (99.99%), throughput (TPS), scalability assumptions. Engineers make wrong assumptions if you don't specify these.", x:120,  y:1280},
+  {id:"tech_debt",      mod:11, label:"Technical Debt",          def:"Future cost from choosing a fast solution now instead of the right one. Accrues interest over time. Make it visible, bound it, plan to repay it. Every speed decision creates debt.", x:320,  y:1240},
+  {id:"slo",            mod:11, label:"SLO",                     def:"Service Level Objective. Your target for reliability or latency: '99.9% of requests complete in under 300ms'. More specific than SLAs. Define in every payments PRD.", x:260,  y:1300},
+  {id:"phased_rollout", mod:11, label:"Phased Rollout",          def:"Release to 1% → 10% → 50% → 100% of users. Monitor metrics at each stage. Visa: new API versions released to 5 pilot partners before all 15,000+ issuers.", x:430,  y:1270},
+];
+
+const EDGES = [
+  ["client","server"],["client","http"],["server","http"],["dns","http"],["http","latency"],["http","idempotency"],["http","status_code"],
+  ["server","backend"],["client","frontend"],["dns","cdn"],
+  ["frontend","backend"],["backend","cloud"],["cdn","cloud"],["cloud","iaas"],["cloud","paas"],["cloud","saas"],
+  ["backend","sql"],["backend","nosql"],
+  ["sql","acid"],["nosql","caching"],["nosql","consistency"],["nosql","scaling_h"],["caching","latency"],
+  ["backend","api"],
+  ["api","rest"],["api","graphql"],["api","webhook"],["api","sdk"],["api","versioning"],["rest","idempotency"],["webhook","idempotency"],
+  ["api","microservices"],
+  ["monolith","microservices"],["microservices","event_driven"],["event_driven","queue"],["microservices","circuit_breaker"],["circuit_breaker","graceful_deg"],
+  ["backend","authn"],
+  ["authn","authz"],["authn","jwt"],["authn","oauth"],["backend","encryption"],["encryption","pci"],
+  ["pci","auth_pay"],
+  ["auth_pay","clearing"],["clearing","settlement"],["issuer","auth_pay"],["acquirer","settlement"],["scheme","auth_pay"],["gateway","auth_pay"],["acquirer","interchange"],["issuer","interchange"],
+  ["frontend","native"],["frontend","pwa"],
+  ["native","cross_platform"],["feature_flag","phased_rollout"],["native","ota"],["cross_platform","ota"],
+  ["feature_flag","circuit_breaker"],
+  ["frontend","event_track"],["backend","event_track"],
+  ["event_track","instrumentation"],["instrumentation","pipeline"],["pipeline","north_star"],["north_star","ab_test"],["ab_test","guardrail"],
+  ["pipeline","ml"],
+  ["ml","supervised"],["supervised","inference"],["inference","prec_recall"],["ml","data_drift"],
+  ["prec_recall","nfr"],
+  ["prd","nfr"],["prd","tech_debt"],["prd","slo"],["prd","phased_rollout"],["slo","latency"],["nfr","latency"],
+  ["idempotency","auth_pay"],["latency","auth_pay"],["latency","slo"],["versioning","prd"],["instrumentation","prd"],["guardrail","nfr"],
+];
+
+const MOD_MAP = {};
+MODULES.forEach(m => MOD_MAP[m.id] = m);
+
+let canvas, ctx, tooltip, ttTerm, ttDef, ttMod;
+let offsetX=0, offsetY=0, scale=0.7;
+let dragging=false, didDrag=false;
+let hoveredNode=null;
+let activeFilter="all", searchTerm="";
+
+function nodeVisible(n){
+  if(activeFilter!=="all" && n.mod!==parseInt(activeFilter)) return false;
+  if(searchTerm && !n.label.toLowerCase().includes(searchTerm) && !n.def.toLowerCase().includes(searchTerm)) return false;
+  return true;
+}
+
+function isDark(){
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme:dark)').matches;
+}
+
+function draw(){
+  const dark = isDark();
+  const dpr = window.devicePixelRatio||1;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.save();
+  ctx.scale(dpr,dpr);
+  ctx.translate(offsetX, offsetY);
+  ctx.scale(scale, scale);
+
+  // Edges
+  EDGES.forEach(([a,b])=>{
+    const na=NODES.find(n=>n.id===a), nb=NODES.find(n=>n.id===b);
+    if(!na||!nb||!nodeVisible(na)||!nodeVisible(nb)) return;
+    const isHov = hoveredNode&&(hoveredNode.id===a||hoveredNode.id===b);
+    ctx.beginPath();
+    ctx.moveTo(na.x,na.y);
+    const mx=(na.x+nb.x)/2,my=(na.y+nb.y)/2;
+    const dx=nb.x-na.x,dy=nb.y-na.y;
+    ctx.quadraticCurveTo(mx-dy*0.05,my+dx*0.05,nb.x,nb.y);
+    ctx.strokeStyle=isHov?(dark?"rgba(255,255,255,0.5)":"rgba(0,0,0,0.35)"):(dark?"rgba(255,255,255,0.08)":"rgba(0,0,0,0.08)");
+    ctx.lineWidth=isHov?1.5:0.8;
+    ctx.stroke();
+  });
+
+  // Nodes
+  NODES.forEach(n=>{
+    if(!nodeVisible(n)) return;
+    const m=MOD_MAP[n.mod];
+    const isHov=hoveredNode&&hoveredNode.id===n.id;
+    const isRel=hoveredNode&&!isHov&&EDGES.some(([a,b])=>(a===hoveredNode.id&&b===n.id)||(b===hoveredNode.id&&a===n.id));
+    const bw=Math.max(n.label.length*6.5+24,76);
+    const bh=28;
+    const bx=n.x-bw/2, by=n.y-bh/2;
+
+    if(isHov){ctx.shadowColor=m.color+"44";ctx.shadowBlur=12;}
+    ctx.beginPath();
+    ctx.roundRect(bx,by,bw,bh,6);
+    ctx.fillStyle=dark?(isHov?m.color+"33":isRel?m.color+"22":"#ffffff08"):(isHov?m.light:isRel?m.light+"cc":"#ffffff");
+    ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.strokeStyle=isHov||isRel?m.color:(dark?"rgba(255,255,255,0.12)":"rgba(0,0,0,0.12)");
+    ctx.lineWidth=isHov?1.5:0.8;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(bx+9,n.y,3,0,Math.PI*2);
+    ctx.fillStyle=m.color;
+    ctx.fill();
+
+    ctx.font=isHov?"500 11px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif":"400 10.5px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif";
+    ctx.fillStyle=dark?(isHov?"#ffffff":isRel?"#ffffffcc":"#ffffff88"):(isHov?m.dark:isRel?m.dark:"#444441");
+    ctx.textAlign="left";
+    ctx.textBaseline="middle";
+    ctx.fillText(n.label,bx+17,n.y);
+  });
+
+  ctx.restore();
+}
+
+function hitTest(mx,my){
+  const cx=(mx-offsetX)/scale, cy=(my-offsetY)/scale;
+  for(let i=NODES.length-1;i>=0;i--){
+    const n=NODES[i];
+    if(!nodeVisible(n)) continue;
+    const bw=Math.max(n.label.length*6.5+24,76), bh=28;
+    if(cx>=n.x-bw/2&&cx<=n.x+bw/2&&cy>=n.y-bh/2&&cy<=n.y+bh/2) return n;
+  }
+  return null;
+}
+
+function showTooltip(node,mx,my){
+  const m=MOD_MAP[node.mod];
+  ttTerm.textContent=node.label;
+  ttDef.textContent=node.def;
+  ttMod.textContent=m.label;
+  ttMod.style.color=m.color;
+  tooltip.style.display="block";
+  const wrap=document.getElementById('canvas-wrap');
+  let tx=mx+14, ty=my-10;
+  if(tx+250>wrap.offsetWidth) tx=mx-260;
+  if(ty+130>wrap.offsetHeight) ty=my-130;
+  if(ty<0) ty=4;
+  tooltip.style.left=tx+"px";
+  tooltip.style.top=ty+"px";
+}
+
+function showDetail(node){
+  const m=MOD_MAP[node.mod];
+  const panel=document.getElementById('detail-panel');
+  document.getElementById('dp-term').textContent=node.label;
+  document.getElementById('dp-def').textContent=node.def;
+  document.getElementById('dp-module').textContent=m.label;
+  document.getElementById('dp-module').style.color=m.color;
+
+  const connected=EDGES
+    .filter(([a,b])=>a===node.id||b===node.id)
+    .map(([a,b])=>a===node.id?b:a)
+    .map(id=>NODES.find(n=>n.id===id))
+    .filter(Boolean);
+  if(connected.length){
+    document.getElementById('dp-connections').innerHTML=
+      `<strong>Connects to:</strong> `+connected.map(n=>`<span style="color:${MOD_MAP[n.mod].color}">${n.label}</span>`).join(', ');
+  } else {
+    document.getElementById('dp-connections').innerHTML='';
+  }
+  panel.classList.add('visible');
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function closeDetail(){
+  document.getElementById('detail-panel').classList.remove('visible');
+}
+
+function onSearch(v){
+  searchTerm=v.toLowerCase().trim();
+  hoveredNode=null;
+  tooltip.style.display="none";
+  draw();
+}
+
+function buildLegend(){
+  const leg=document.getElementById('legend');
+  MODULES.forEach(m=>{
+    const el=document.createElement('div');
+    el.className='leg-item';
+    el.innerHTML=`<div class="leg-dot" style="background:${m.color}"></div><span>${m.label}</span>`;
+    leg.appendChild(el);
+  });
+}
+
+function initCanvas(){
+  canvas=document.getElementById('c');
+  const wrap=document.getElementById('canvas-wrap');
+  const dpr=window.devicePixelRatio||1;
+  const cw=wrap.offsetWidth||860;
+  const ch=560;
+  wrap.style.height=ch+"px";
+  canvas.width=cw*dpr;
+  canvas.height=ch*dpr;
+  canvas.style.width=cw+"px";
+  canvas.style.height=ch+"px";
+  ctx=canvas.getContext('2d');
+  offsetX=cw/2-380*scale;
+  offsetY=20;
+  tooltip=document.getElementById('tooltip');
+  ttTerm=document.getElementById('tt-term');
+  ttDef=document.getElementById('tt-def');
+  ttMod=document.getElementById('tt-module');
+
+  canvas.addEventListener('mousemove',e=>{
+    const r=canvas.getBoundingClientRect();
+    const mx=e.clientX-r.left, my=e.clientY-r.top;
+    const node=hitTest(mx,my);
+    if(dragging){offsetX+=e.movementX;offsetY+=e.movementY;didDrag=true;}
+    if(node){
+      hoveredNode=node;
+      showTooltip(node,mx,my);
+      canvas.style.cursor="pointer";
+    } else {
+      if(hoveredNode){hoveredNode=null;tooltip.style.display="none";}
+      canvas.style.cursor=dragging?"grabbing":"grab";
+    }
+    draw();
+  });
+
+  canvas.addEventListener('mouseleave',()=>{hoveredNode=null;tooltip.style.display="none";dragging=false;canvas.classList.remove('dragging');draw();});
+
+  canvas.addEventListener('mousedown',e=>{
+    const r=canvas.getBoundingClientRect();
+    const mx=e.clientX-r.left, my=e.clientY-r.top;
+    if(!hitTest(mx,my)){dragging=true;didDrag=false;canvas.classList.add('dragging');}
+  });
+
+  canvas.addEventListener('mouseup',e=>{
+    const r=canvas.getBoundingClientRect();
+    const mx=e.clientX-r.left, my=e.clientY-r.top;
+    const node=hitTest(mx,my);
+    if(node&&!didDrag) showDetail(node);
+    dragging=false;didDrag=false;canvas.classList.remove('dragging');
+  });
+
+  canvas.addEventListener('wheel',e=>{
+    e.preventDefault();
+    const r=canvas.getBoundingClientRect();
+    const mx=e.clientX-r.left, my=e.clientY-r.top;
+    const delta=-e.deltaY*0.001;
+    const ns=Math.max(0.25,Math.min(2.8,scale+delta));
+    offsetX=mx-(mx-offsetX)*(ns/scale);
+    offsetY=my-(my-offsetY)*(ns/scale);
+    scale=ns;
+    draw();
+  },{passive:false});
+
+  let lastTouchDist=0;
+  canvas.addEventListener('touchstart',e=>{
+    if(e.touches.length===1){dragging=true;didDrag=false;}
+    if(e.touches.length===2){const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;lastTouchDist=Math.sqrt(dx*dx+dy*dy);}
+    e.preventDefault();
+  },{passive:false});
+  canvas.addEventListener('touchmove',e=>{
+    if(e.touches.length===1&&dragging){
+      const r=canvas.getBoundingClientRect();
+      offsetX+=e.touches[0].clientX-(r.left+(e.touches[0].clientX-r.left));
+      draw();
+    }
+    if(e.touches.length===2){const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;const d=Math.sqrt(dx*dx+dy*dy);scale=Math.max(0.25,Math.min(2.8,scale*(d/lastTouchDist)));lastTouchDist=d;draw();}
+    e.preventDefault();
+  },{passive:false});
+  canvas.addEventListener('touchend',()=>{dragging=false;});
+
+  document.querySelectorAll('.filter-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter=btn.dataset.mod;
+      hoveredNode=null;tooltip.style.display="none";
+      if(activeFilter!=="all"){
+        const vis=NODES.filter(n=>n.mod===parseInt(activeFilter));
+        if(vis.length){
+          const cx_=vis.reduce((s,n)=>s+n.x,0)/vis.length;
+          const cy_=vis.reduce((s,n)=>s+n.y,0)/vis.length;
+          offsetX=canvas.offsetWidth/2-cx_*scale;
+          offsetY=canvas.offsetHeight/2-cy_*scale;
+        }
+      }
+      draw();
+    });
+  });
+
+  window.addEventListener('resize',()=>{
+    const cw2=wrap.offsetWidth||860;
+    canvas.width=cw2*dpr;
+    canvas.style.width=cw2+"px";
+    draw();
+  });
+
+  buildLegend();
+  draw();
+}
+
+if(document.readyState==="loading"){
+  document.addEventListener('DOMContentLoaded',initCanvas);
+} else {
+  setTimeout(initCanvas,50);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,593 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); }
+  
+  .playbook { padding: 1.5rem 0; max-width: 860px; }
+  
+  .search-bar {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 14px;
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-lg);
+    background: var(--color-background-primary);
+    color: var(--color-text-primary);
+    margin-bottom: 1.25rem;
+  }
+  .search-bar:focus { outline: none; border-color: var(--color-border-primary); }
+
+  .tab-bar {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+  }
+  .tab {
+    padding: 6px 14px;
+    font-size: 13px;
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: 99px;
+    cursor: pointer;
+    background: var(--color-background-primary);
+    color: var(--color-text-secondary);
+    transition: all 0.15s;
+  }
+  .tab.active, .tab:hover {
+    background: var(--color-background-secondary);
+    color: var(--color-text-primary);
+    border-color: var(--color-border-primary);
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    margin: 1.5rem 0 0.75rem;
+  }
+
+  .card {
+    background: var(--color-background-primary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .card-header:hover { background: var(--color-background-secondary); }
+  .card-tag {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 9px;
+    border-radius: 99px;
+  }
+  .tag-template { background: #E6F1FB; color: #0C447C; }
+  .tag-description { background: #EAF3DE; color: #27500A; }
+  .tag-discernment { background: #FAEEDA; color: #633806; }
+  .tag-diligence { background: #FAECE7; color: #4A1B0C; }
+  @media (prefers-color-scheme: dark) {
+    .tag-template { background: #0C447C; color: #B5D4F4; }
+    .tag-description { background: #27500A; color: #C0DD97; }
+    .tag-discernment { background: #633806; color: #FAC775; }
+    .tag-diligence { background: #4A1B0C; color: #F5C4B3; }
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    flex: 1;
+  }
+  .card-sub {
+    font-size: 12px;
+    color: var(--color-text-tertiary);
+  }
+  .chevron {
+    font-size: 12px;
+    color: var(--color-text-tertiary);
+    transition: transform 0.2s;
+  }
+  .chevron.open { transform: rotate(90deg); }
+
+  .card-body {
+    display: none;
+    padding: 0 16px 16px;
+    border-top: 0.5px solid var(--color-border-tertiary);
+  }
+  .card-body.open { display: block; }
+
+  .field-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 14px 0 6px;
+  }
+  .field-label:first-child { margin-top: 14px; }
+
+  .code-block {
+    background: var(--color-background-tertiary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-md);
+    padding: 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-text-primary);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .inline-code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--color-background-tertiary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+
+  .prose {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+  }
+  .prose ul { padding-left: 1.2rem; margin-top: 4px; }
+  .prose li { margin-bottom: 4px; }
+
+  .chip-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+  .chip {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    border: 0.5px solid var(--color-border-secondary);
+    color: var(--color-text-secondary);
+    background: var(--color-background-secondary);
+  }
+
+  .example-box {
+    background: var(--color-background-secondary);
+    border-left: 2px solid var(--color-border-secondary);
+    border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    font-style: italic;
+    margin-top: 4px;
+  }
+
+  .signal-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .signal-card {
+    padding: 10px 12px;
+    border-radius: var(--border-radius-md);
+    border: 0.5px solid var(--color-border-tertiary);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .signal-pass { border-left: 2px solid #1D9E75; }
+  .signal-warn { border-left: 2px solid #BA7517; }
+  .signal-icon { font-size: 11px; font-weight: 500; margin-bottom: 3px; }
+  .signal-icon.pass { color: #0F6E56; }
+  .signal-icon.warn { color: #854F0B; }
+  @media (prefers-color-scheme: dark) {
+    .signal-icon.pass { color: #5DCAA5; }
+    .signal-icon.warn { color: #EF9F27; }
+  }
+  .no-results {
+    text-align: center;
+    padding: 2rem;
+    color: var(--color-text-tertiary);
+    font-size: 14px;
+  }
+  .count-badge {
+    font-size: 11px;
+    background: var(--color-background-secondary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: 99px;
+    padding: 2px 8px;
+    color: var(--color-text-tertiary);
+    margin-left: auto;
+  }
+</style>
+
+<div class="playbook">
+  <input class="search-bar" id="search" placeholder="Search templates, techniques, patterns..." oninput="filterCards()" />
+
+  <div class="tab-bar">
+    <div class="tab active" onclick="filterTab(this,'all')">All</div>
+    <div class="tab" onclick="filterTab(this,'template')">Delegation templates</div>
+    <div class="tab" onclick="filterTab(this,'description')">Description techniques</div>
+    <div class="tab" onclick="filterTab(this,'discernment')">Discernment patterns</div>
+    <div class="tab" onclick="filterTab(this,'diligence')">Diligence patterns</div>
+  </div>
+
+  <div id="cards-container"></div>
+</div>
+
+<script>
+const DATA = [
+  {
+    id: 1, type: "template",
+    title: "Architecture-before-code prompt",
+    sub: "System / Agent design",
+    keywords: "architecture agent system design before code pipeline vee vee mochi payments",
+    template: `I want to build [system name].
+
+Goal: [one-sentence outcome]
+Users/consumers: [who or what will use this]
+Constraints: [cost, infra, privacy, latency]
+
+Before writing any code, help me design the architecture:
+- Components and responsibilities
+- Data flow between components
+- Where AI is used vs deterministic logic
+- Known failure modes and mitigations
+
+I'll confirm the design before we write any code.`,
+    techniques: ["State goal, not solution — let the design emerge from requirements", "Explicitly gate code behind confirmation", "Surface constraints upfront (cost, infra, privacy) so they shape the design"],
+    example: "Used to design Vee Vee v2 (fetcher → scorer → summariser → Telegram), Mochi's 3-model stack, and Investment Dashboard layers before writing a single line.",
+    context: "Any agent or multi-component system. Works best when you're not sure of the right architecture yet."
+  },
+  {
+    id: 2, type: "template",
+    title: "Incremental build prompt",
+    sub: "Implementation",
+    keywords: "step by step build implementation incremental code terminal commands",
+    template: `We've agreed on the architecture. Let's implement [component name].
+
+Current state: [what exists / what file we're in]
+This step: [one specific thing to build]
+Dependencies: [functions/modules this relies on]
+Success criteria: [how I'll know it works]
+
+Give me step-by-step terminal commands with explanations.
+Flag anything that could break existing functionality.`,
+    techniques: ["One component at a time — never multi-component in a single prompt", "Always state current state so Claude doesn't assume clean slate", "Ask for terminal commands with explanations, not just code blocks"],
+    example: "Used to add mark_as_sent() to ranker.py, wire Telegram delivery into main.py, and configure launchd plist for Vee Vee v2.",
+    context: "Post-architecture implementation. Keeps changes small, reviewable, and reversible."
+  },
+  {
+    id: 3, type: "template",
+    title: "Debugging + root cause prompt",
+    sub: "Error / Debugging",
+    keywords: "debug error bug fix root cause xml rss finextra sax parse",
+    template: `I'm getting this error:
+[paste exact error message]
+
+Context:
+- File: [filename]
+- Function: [function name]
+- What I was doing: [action that triggered it]
+
+What I've already tried: [list attempts]
+
+Diagnose the root cause first before suggesting a fix.
+If there are multiple possible causes, rank them by likelihood.`,
+    techniques: ["Paste exact error, not paraphrased — Claude pattern-matches on specific strings", "State what you've tried to avoid re-suggesting the same thing", "Ask for root cause diagnosis before fix — prevents treating symptoms"],
+    example: "Used to diagnose Finextra SAXParseException (malformed XML surviving all cleaning attempts), Guardian API pipe-character bug in section= filter, and Telegram -100 prefix issue.",
+    context: "Any error that isn't immediately obvious. The root-cause-first instruction consistently surfaces better diagnoses."
+  },
+  {
+    id: 4, type: "template",
+    title: "Persona / system prompt engineering",
+    sub: "AI behaviour design",
+    keywords: "persona system prompt mochi cat character behaviour tone voice deadpan literal",
+    template: `I'm designing a persona for [agent name].
+
+Role: [what this agent does]
+Personality: [3–5 specific traits, not generic adjectives]
+Tone: [specific examples of how it would and wouldn't phrase things]
+Physical/behavioural rules: [specific constraints on actions]
+Humour mechanics: [where humour comes from, what to avoid]
+Escalation points: [when the persona shifts or has milestone moments]
+
+Write the system prompt. Then show me 3 sample interactions that demonstrate the persona correctly.`,
+    techniques: ["Specify where humour comes from, not just 'be funny'", "Include negative examples — what the persona would NOT do", "Ask for sample interactions to verify the persona before deployment", "Define milestone/escalation moments separately from default behaviour"],
+    example: "Produced Mochi system prompt: deadpan humour from physical cat literalness, rationed physical actions for milestone weight, DeepSeek V3.2 as orchestrator.",
+    context: "Any AI with a distinct character. The sample-interactions step is the most important quality gate."
+  },
+  {
+    id: 5, type: "template",
+    title: "Model / tool selection prompt",
+    sub: "Delegation / architecture",
+    keywords: "model selection haiku sonnet gemini flash deepseek cost split delegation which model",
+    template: `I need to choose models for [system/workflow].
+
+Tasks to perform:
+1. [task] — frequency: [X/day], latency requirement: [real-time/batch]
+2. [task] — frequency: [X/day], latency requirement: [real-time/batch]
+
+Constraints:
+- Monthly budget target: [amount]
+- Privacy: [what data is being processed]
+- Quality floor: [minimum acceptable output]
+
+Recommend a model per task with cost estimate and reasoning.
+Flag any tasks where the cheapest model is a quality risk.`,
+    techniques: ["Frame by task + frequency, not 'what's the best model'", "State quality floor explicitly — cheapest is not always acceptable", "Ask Claude to flag quality risks, not just cost"],
+    example: "Led to: Haiku for Vee Vee scoring/fetching (high freq, low stakes), Sonnet for Investment Dashboard Strategy Agent (low freq, high stakes), DeepSeek V3.2 + Qwen-Flash split for Mochi.",
+    context: "Multi-model systems. Prevents defaulting to the same model for every task."
+  },
+  {
+    id: 6, type: "description",
+    title: "Constraint-first context loading",
+    sub: "How to frame any task",
+    keywords: "context constraints cost privacy latency infrastructure framing task description",
+    techniques: ["Lead with constraints, not the request — Claude designs around them rather than retrofitting", "Cost in SGD is a standing constraint in all your prompts", "Privacy constraint triggers automatic API data-handling review"],
+    example: "Stating 'zero or near-zero incremental cost' upfront shaped every architecture — GitHub Actions over new servers, Google Apps Script over paid APIs, SQLite over hosted DBs.",
+    context: "Works for any task type. The constraint-first habit is your most consistent Description strength.",
+    pattern: `Constraints → Goal → Request (not Goal → Request → Constraints)`
+  },
+  {
+    id: 7, type: "description",
+    title: "Grep-first function verification",
+    sub: "Code tasks",
+    keywords: "grep function name verify exist code file ranker summariser mark_as_sent",
+    techniques: ["Always verify function names with grep before referencing them cross-file", "Prevents referencing functions that don't exist or have different signatures", "Pattern: grep '^def ' filename.py before any cross-file wiring task"],
+    example: "Caught that mark_as_sent() existed in ranker.py but was not called in main.py — deduplication silently inactive. Would have shipped broken without this check.",
+    context: "Any task that wires together functions across files. Run before writing integration code.",
+    pattern: `grep "^def " [filename].py  →  confirm names  →  then write integration`
+  },
+  {
+    id: 8, type: "description",
+    title: "File-write safety protocol",
+    sub: "Code tasks",
+    keywords: "file write cat heredoc vscode paste corrupt terminal bash",
+    techniques: ["Always use cat > file << 'ENDOFFILE' in terminal for file writes", "VS Code paste corrupts content (indentation, special characters, line endings)", "For multi-line scripts, write to /tmp first, inspect, then move"],
+    example: "Discovered VS Code paste corruption mid-Vee Vee build — switched to heredoc terminal writes for all subsequent file operations.",
+    context: "Any file creation or large edit in a remote/terminal environment.",
+    pattern: `cat > filename.py << 'ENDOFFILE'\n[content]\nENDOFFILE`
+  },
+  {
+    id: 9, type: "description",
+    title: "RSS source pre-qualification",
+    sub: "Data pipeline tasks",
+    keywords: "rss feed xml validation finextra payments dive finovate guardian api source",
+    techniques: ["Always validate a new RSS source with a test fetch before adding to pipeline", "Finextra: permanently blocklisted — malformed XML survives all cleaning", "Guardian API: section= pipe character invalid without URL encoding — remove filter entirely", "Apps Script pre-cleaning: ampersand normalization + control character stripping"],
+    example: "Finextra removed from both Vee Vee and Payments 101 after persistent SAXParseException. Payments Dive and Finovate validated as stable replacements.",
+    context: "Any project ingesting RSS/XML feeds. Run validation before designing around a source.",
+    pattern: `fetch → parse → check for SAXParseException / malformed XML → only then add to pipeline`
+  },
+  {
+    id: 10, type: "description",
+    title: "Structured curriculum design",
+    sub: "Education / content pipeline tasks",
+    keywords: "curriculum mece modules topic payments 101 email agent learning",
+    techniques: ["Use MECE structure (Mutually Exclusive, Collectively Exhaustive) for curriculum modules", "Label modules alphabetically (A–H) for easy reference in prompts and code", "Always specify delivery cadence in the design, not as an afterthought"],
+    example: "Payments 101: 35 topics across 8 MECE modules (A–H), delivered Fri/Sat/Sun via Google Apps Script + Claude API. Curriculum structure survived intact through multiple delivery format changes.",
+    context: "Any content delivery agent or learning pipeline. MECE labeling makes curriculum prompts much easier to maintain."
+  },
+  {
+    id: 11, type: "discernment",
+    title: "False positive calibration pattern",
+    sub: "AI output quality",
+    keywords: "false positive calibration threshold scorer sexiness buzz breaking news keyword",
+    signals: [
+      { pass: true, text: "Check: is this a calibration problem or a cost problem? Raising threshold is free; adding API calls is not." },
+      { pass: true, text: "Use compound keywords (e.g. 'real-time payments') not generic singles ('visa', 'mastercard')" },
+      { pass: false, text: "Raising threshold without dry-run testing — you don't know if you've overcorrected" },
+      { pass: false, text: "Accepting the first threshold value as final without iteration" }
+    ],
+    example: "Vee Vee breaking news: generic keywords ('visa', 'mastercard') triggered too many false positives. Fix: compound terms + threshold raised 3→5. Dry-run test still pending — this is an open gap.",
+    context: "Any scoring or classification system. The calibration-vs-cost diagnosis is a reusable mental model."
+  },
+  {
+    id: 12, type: "discernment",
+    title: "Cross-file wiring verification",
+    sub: "Code review",
+    keywords: "integration wiring cross file function call main.py ranker dedup mark_as_sent",
+    signals: [
+      { pass: true, text: "Check: does every function that should be called actually have a call site?" },
+      { pass: true, text: "Read main.py (or entry point) end-to-end after adding a new utility function" },
+      { pass: false, text: "Assuming a function is active because it exists in the codebase" },
+      { pass: false, text: "Skipping entry point review after writing a helper — silent failures are common" }
+    ],
+    example: "mark_as_sent() written in ranker.py, never called in main.py. Deduplication was silently inactive for weeks. Caught only by explicitly reviewing the full main.py call graph.",
+    context: "Any multi-file Python project. Run this check after every new function addition."
+  },
+  {
+    id: 13, type: "discernment",
+    title: "Architecture failure mode review",
+    sub: "System design",
+    keywords: "failure mode edge case rate limit timeout api cost architecture review",
+    signals: [
+      { pass: true, text: "Ask: what happens if [API] rate-limits? What if the scheduled job runs twice?" },
+      { pass: true, text: "Identify every external dependency and name its failure mode explicitly" },
+      { pass: false, text: "Accepting an architecture without naming at least 2 failure scenarios" },
+      { pass: false, text: "Assuming 'it should work in theory' — Finextra and Guardian API both failed in theory" }
+    ],
+    example: "Identified that GitHub Actions + Claude Code CLI can't authenticate headlessly → moved summarisation to local Mac. Identified Finextra XML failures that survive all cleaning → permanent removal.",
+    context: "Review before finalising any system design. Your strongest discernment moments came from naming failure modes early."
+  },
+  {
+    id: 14, type: "discernment",
+    title: "Dry-run before deploy",
+    sub: "Testing / QA",
+    keywords: "dry run test deploy before live output verify telegram channel",
+    signals: [
+      { pass: true, text: "Run pipeline with dry_run=True flag before live Telegram delivery" },
+      { pass: true, text: "Print/log expected output and manually inspect before enabling delivery" },
+      { pass: false, text: "Deploying a revised scorer or threshold without a test run" },
+      { pass: false, text: "Treating 'no errors' as 'correct output' — silent wrong outputs are worse than crashes" }
+    ],
+    example: "Revised breaking news threshold (3→5) not yet dry-run tested as of last session. This is the most concrete open Discernment gap in your current projects.",
+    context: "Any change to scoring, filtering, or delivery logic. Non-negotiable before going live."
+  },
+  {
+    id: 15, type: "diligence",
+    title: "API key security checklist",
+    sub: "Security",
+    keywords: "api key secret environment variable properties service dotenv security hardening",
+    signals: [
+      { pass: true, text: "Store keys in .env (local) or Properties Service (Apps Script) — never hardcode" },
+      { pass: true, text: "Check .gitignore includes .env before first commit" },
+      { pass: false, text: "Pasting API keys into shared documents, GitHub issues, or Slack messages" },
+      { pass: false, text: "Using the same API key across projects — scope and rotate separately" }
+    ],
+    example: "Payments 101: API key in Apps Script Properties Service, not in script body. Vee Vee: .env excluded from repo. Both implemented without prompting — this is your strongest Diligence habit.",
+    context: "First step in any new project. Run before writing any code that touches external APIs."
+  },
+  {
+    id: 16, type: "diligence",
+    title: "Output audit trail pattern",
+    sub: "Accountability",
+    keywords: "audit log sqlite output trace sent stories dedup accountability review",
+    signals: [
+      { pass: true, text: "Log every AI-generated output to SQLite with timestamp, source, and content hash" },
+      { pass: true, text: "Separate sent_stories table for dedup from audit log — different purposes" },
+      { pass: false, text: "No record of what was sent — can't review or audit agent outputs post-hoc" },
+      { pass: false, text: "Relying on Telegram history as the only audit trail — not queryable or reliable" }
+    ],
+    example: "Vee Vee has sent_stories.db for dedup but no audit log of story content or summaries sent. This is an open Diligence gap — a lightweight audit table (story_id, headline, summary_hash, sent_at) would close it.",
+    context: "Any agent that publishes or delivers AI-generated content. Especially important for the Investment Dashboard."
+  },
+  {
+    id: 17, type: "diligence",
+    title: "Financial output guardrails",
+    sub: "Risk / compliance",
+    keywords: "financial investment dashboard strategy agent disclaimer guardrail visa sensitive",
+    signals: [
+      { pass: true, text: "Add explicit disclaimer: 'This is not financial advice' in every Strategy Agent output" },
+      { pass: true, text: "Cost-confirmation gate before every API call in Layer 2 and Layer 3" },
+      { pass: false, text: "Letting the Strategy Agent output read as a recommendation without caveats" },
+      { pass: false, text: "Sending Visa-adjacent analysis through external APIs without reviewing data scope" }
+    ],
+    example: "Investment Dashboard Layer 3 (Strategy Agent) is designed with cost confirmation. Disclaimer language and output framing guardrails are not yet implemented — this is the highest-risk open Diligence gap.",
+    context: "Mandatory for the Investment Dashboard before any live use. Also applies to any payments-adjacent analysis."
+  },
+  {
+    id: 18, type: "diligence",
+    title: "HTML sanitisation in email agents",
+    sub: "Security",
+    keywords: "html sanitisation xss injection email apps script payments 101 security",
+    signals: [
+      { pass: true, text: "Sanitise all AI-generated HTML before rendering in email — strip <script>, on* attrs" },
+      { pass: true, text: "Use table-based layout in email — CSS flex/overflow unreliable in email clients" },
+      { pass: false, text: "Rendering raw AI output HTML directly into email body" },
+      { pass: false, text: "Using display:flex or overflow:hidden in email CSS — breaks in most clients" }
+    ],
+    example: "Payments 101 implements HTML sanitisation + inline-style table layout. Progress bars built as two-cell table rows with pixel-width calculation. Survived testing across Gmail and Outlook.",
+    context: "Any agent delivering HTML email. The table-layout lesson applies universally — not just security but rendering fidelity."
+  }
+];
+
+let activeTab = 'all';
+let activeSearch = '';
+
+function tagHTML(type) {
+  const labels = { template: 'Delegation template', description: 'Description technique', discernment: 'Discernment pattern', diligence: 'Diligence pattern' };
+  return `<span class="card-tag tag-${type}">${labels[type]}</span>`;
+}
+
+function renderCard(d) {
+  const bodyId = `body-${d.id}`;
+  const chevronId = `chev-${d.id}`;
+  let body = '';
+
+  if (d.pattern) {
+    body += `<div class="field-label">Core pattern</div><div class="code-block">${d.pattern}</div>`;
+  }
+  if (d.template) {
+    body += `<div class="field-label">Template</div><div class="code-block">${escHtml(d.template)}</div>`;
+  }
+  if (d.techniques) {
+    body += `<div class="field-label">Techniques</div><div class="prose"><ul>${d.techniques.map(t=>`<li>${t}</li>`).join('')}</ul></div>`;
+  }
+  if (d.signals) {
+    body += `<div class="field-label">Pass / warn signals</div><div class="signal-row">`;
+    d.signals.forEach(s => {
+      body += `<div class="signal-card ${s.pass ? 'signal-pass' : 'signal-warn'}">
+        <div class="signal-icon ${s.pass ? 'pass' : 'warn'}">${s.pass ? '✓ pass' : '⚠ watch'}</div>
+        <div class="prose">${s.text}</div>
+      </div>`;
+    });
+    body += `</div>`;
+  }
+  if (d.example) {
+    body += `<div class="field-label">Reference example</div><div class="example-box">${d.example}</div>`;
+  }
+  if (d.context) {
+    body += `<div class="field-label">When to use</div><div class="prose">${d.context}</div>`;
+  }
+
+  return `<div class="card" data-type="${d.type}" data-keywords="${d.keywords}" data-title="${d.title.toLowerCase()}">
+    <div class="card-header" onclick="toggleCard(${d.id})">
+      ${tagHTML(d.type)}
+      <span class="card-title">${d.title}</span>
+      <span class="card-sub">${d.sub}</span>
+      <span class="chevron" id="${chevronId}">▶</span>
+    </div>
+    <div class="card-body" id="${bodyId}">${body}</div>
+  </div>`;
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function toggleCard(id) {
+  const body = document.getElementById(`body-${id}`);
+  const chev = document.getElementById(`chev-${id}`);
+  const open = body.classList.toggle('open');
+  chev.classList.toggle('open', open);
+}
+
+function filterTab(el, tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  activeTab = tab;
+  render();
+}
+
+function filterCards() {
+  activeSearch = document.getElementById('search').value.toLowerCase();
+  render();
+}
+
+function render() {
+  const container = document.getElementById('cards-container');
+  const groups = { template: [], description: [], discernment: [], diligence: [] };
+
+  DATA.forEach(d => {
+    if (activeTab !== 'all' && d.type !== activeTab) return;
+    const searchable = d.title.toLowerCase() + ' ' + d.keywords;
+    if (activeSearch && !searchable.includes(activeSearch)) return;
+    groups[d.type].push(d);
+  });
+
+  const labels = {
+    template: 'Delegation templates',
+    description: 'Description techniques',
+    discernment: 'Discernment patterns',
+    diligence: 'Diligence patterns'
+  };
+
+  let html = '';
+  let total = 0;
+  Object.entries(groups).forEach(([type, items]) => {
+    if (!items.length) return;
+    total += items.length;
+    if (activeTab === 'all') html += `<div class="section-label">${labels[type]}</div>`;
+    items.forEach(d => { html += renderCard(d); });
+  });
+
+  if (!total) html = `<div class="no-results">No results for "${activeSearch}"</div>`;
+  container.innerHTML = html;
+}
+
+render();
+</script>

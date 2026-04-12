@@ -1,0 +1,230 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+#wrap{padding:12px 0 0}
+#controls{display:flex;align-items:center;gap:10px;padding:0 12px 12px;flex-wrap:wrap;border-bottom:0.5px solid var(--color-border-tertiary)}
+#controls span{font-size:12px;color:var(--color-text-secondary)}
+.tog{font-size:11px;padding:3px 10px;border-radius:20px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-secondary);cursor:pointer;transition:all .15s}
+.tog.on{background:var(--color-background-secondary);color:var(--color-text-primary)}
+#timeline{padding:14px 12px 0;overflow-x:auto}
+#tl-inner{display:flex;gap:0;align-items:flex-start;min-width:max-content;padding-bottom:8px}
+.pair{display:flex;flex-direction:column;align-items:center;gap:0}
+.pair-emails{display:flex;gap:6px;align-items:center}
+.e-node{width:96px;border-radius:6px;border:0.5px solid var(--color-border-secondary);padding:7px 8px;cursor:pointer;transition:all .15s;background:var(--color-background-primary)}
+.e-node:hover{background:var(--color-background-secondary);border-color:var(--color-border-primary)}
+.e-node .num{font-size:10px;color:var(--color-text-tertiary);font-family:var(--font-mono);margin-bottom:2px}
+.e-node .title{font-size:11px;color:var(--color-text-primary);line-height:1.3;font-weight:500}
+.e-node .mod{font-size:10px;margin-top:3px}
+.cp-node{width:108px;border-radius:6px;padding:7px 8px;cursor:pointer;transition:all .15s;border:0.5px solid #BA7517;background:#FAEEDA}
+.cp-node:hover{background:#FAC775}
+.cp-node .num{font-size:10px;color:#854F0B;font-family:var(--font-mono);margin-bottom:2px}
+.cp-node .title{font-size:11px;color:#633806;line-height:1.3;font-weight:500}
+.cp-node .badge{font-size:9px;background:#EF9F27;color:#412402;padding:1px 5px;border-radius:10px;margin-top:3px;display:inline-block}
+@media(prefers-color-scheme:dark){
+  .cp-node{background:#412402;border-color:#EF9F27}
+  .cp-node:hover{background:#633806}
+  .cp-node .num{color:#FAC775}
+  .cp-node .title{color:#FAEEDA}
+  .cp-node .badge{background:#633806;color:#FAC775}
+}
+.arrow-h{display:flex;align-items:center;padding:0 2px}
+.arrow-h svg{width:16px;height:16px;opacity:0.3}
+.cp-arrow{width:100%;display:flex;justify-content:center;padding:4px 0}
+.cp-arrow svg{width:14px;height:14px;opacity:0.4}
+#detail{margin:12px 12px 0;padding:12px 14px;border-radius:8px;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);min-height:56px;display:none}
+#detail.show{display:block}
+#dt-badge{font-size:10px;font-weight:500;margin-bottom:5px}
+#dt-title{font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+#dt-sub{font-size:12px;color:var(--color-text-secondary);line-height:1.6}
+#dt-ask{margin-top:8px}
+.stats{display:flex;gap:12px;padding:10px 12px 12px;border-top:0.5px solid var(--color-border-tertiary);margin-top:12px}
+.stat{background:var(--color-background-secondary);border-radius:6px;padding:8px 12px;flex:1;text-align:center}
+.stat .val{font-size:18px;font-weight:500;color:var(--color-text-primary)}
+.stat .lbl{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
+</style>
+
+<h2 class="sr-only">Interactive delivery sequence mindmap showing all 30 Architect curriculum items: 20 content emails and 10 checkpoint emails in order</h2>
+
+<div id="wrap">
+  <div id="controls">
+    <span>Show:</span>
+    <button class="tog on" id="tog-all" onclick="filter('all')">All 30</button>
+    <button class="tog" id="tog-email" onclick="filter('email')">Emails only</button>
+    <button class="tog" id="tog-cp" onclick="filter('cp')">Checkpoints only</button>
+  </div>
+
+  <div id="timeline">
+    <div id="tl-inner"></div>
+  </div>
+
+  <div id="detail">
+    <div id="dt-badge"></div>
+    <div id="dt-title"></div>
+    <div id="dt-sub"></div>
+    <div id="dt-ask"><button onclick="askMore()" style="font-size:12px">Ask about this ↗</button></div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="val">20</div><div class="lbl">content emails</div></div>
+    <div class="stat"><div class="val">10</div><div class="lbl">checkpoints</div></div>
+    <div class="stat"><div class="val">30</div><div class="lbl">total days</div></div>
+    <div class="stat"><div class="val">0</div><div class="lbl" id="stat-cost">SGD cost</div></div>
+  </div>
+</div>
+
+<script>
+const MOD_COLORS = {
+  1:"#378ADD",2:"#1D9E75",3:"#7F77DD",4:"#D85A30",5:"#D4537E",
+  6:"#BA7517",7:"#185FA5",8:"#639922",9:"#E24B4A",10:"#888780",11:"#3B8BD4"
+};
+const MOD_NAMES = {
+  1:"M1 · Networking",2:"M2 · Frontend/Cloud",3:"M3 · Databases",
+  4:"M4 · APIs",5:"M5 · Architecture",6:"M6 · Security",
+  7:"M7 · Payments",8:"M8 · Mobile",9:"M9 · Analytics",
+  10:"M10 · AI/ML",11:"M11 · PRDs"
+};
+
+const EMAILS = [
+  {n:1,mod:1,title:"How the internet works",sub:"Client-server model, IP addresses, DNS"},
+  {n:2,mod:1,title:"HTTP, latency & idempotency",sub:"Requests, status codes, p99 SLAs, retry safety"},
+  {n:3,mod:2,title:"Frontend vs backend",sub:"Where code runs, trust boundaries, scope splitting"},
+  {n:4,mod:2,title:"Cloud 101",sub:"IaaS, PaaS, SaaS, CDNs, hybrid cloud"},
+  {n:5,mod:3,title:"SQL & relational databases",sub:"Tables, ACID, when data integrity is critical"},
+  {n:6,mod:3,title:"NoSQL, caching & consistency",sub:"Redis, Cassandra, eventual consistency trade-offs"},
+  {n:7,mod:4,title:"APIs: the contracts",sub:"What APIs are, REST, versioning, DX"},
+  {n:8,mod:4,title:"REST vs GraphQL vs Webhooks",sub:"Patterns, SDKs, when to use each"},
+  {n:9,mod:5,title:"Monoliths vs microservices",sub:"When to split, migration signals, trade-offs"},
+  {n:10,mod:5,title:"Event-driven & resilience",sub:"Kafka, circuit breakers, graceful degradation"},
+  {n:11,mod:6,title:"Auth: passwords, tokens, JWTs",sub:"Hashing, session management, stateless auth"},
+  {n:12,mod:6,title:"OAuth, encryption & PCI-DSS",sub:"Delegated access, AES-256, card data compliance"},
+  {n:13,mod:7,title:"Payment flow",sub:"Auth, clearing, settlement — 3 distinct phases"},
+  {n:14,mod:7,title:"Payment players",sub:"Issuer, acquirer, scheme, gateway, interchange"},
+  {n:15,mod:8,title:"Mobile vs web",sub:"Native, cross-platform, PWA — choosing platform"},
+  {n:16,mod:8,title:"App distribution & updates",sub:"App store, OTA, feature flags, phased rollout"},
+  {n:17,mod:9,title:"Product analytics: events",sub:"Instrumentation, pipelines, what to track"},
+  {n:18,mod:9,title:"Metrics & A/B testing",sub:"North star, guardrails, statistical significance"},
+  {n:19,mod:10,title:"AI/ML fundamentals",sub:"Supervised learning, inference, precision/recall"},
+  {n:20,mod:11,title:"PRDs, tech debt & release",sub:"NFRs, rollout plans, debt management"},
+];
+
+const CHECKPOINTS = [
+  {n:1,title:"Networking fundamentals",sub:"Client-server, DNS, HTTP, latency, idempotency — scenario: prevent duplicate payment"},
+  {n:2,title:"Frontend, backend & cloud",sub:"Where logic lives, cloud models — scenario: spending insights calculation"},
+  {n:3,title:"Databases & storage",sub:"SQL vs NoSQL vs cache — scenario: ride-hailing 3-database defence"},
+  {n:4,title:"APIs & integrations",sub:"REST, webhooks, versioning — scenario: fraud alert notification system"},
+  {n:5,title:"System architecture",sub:"Monolith, microservices, resilience — scenario: fraud service circuit breaker"},
+  {n:6,title:"Security & compliance",sub:"Auth, JWT, PCI-DSS — scenario: merchant portal 3 violations"},
+  {n:7,title:"Payments core",sub:"Auth/clearing/settlement, players — scenario: seller dashboard phases"},
+  {n:8,title:"Mobile & app distribution",sub:"Platforms, feature flags, OTA — scenario: critical currency bug fix"},
+  {n:9,title:"Analytics & experimentation",sub:"Events, metrics, A/B tests — scenario: one-tap payment experiment"},
+  {n:10,title:"Full curriculum review",sub:"ML + PRDs — final scenario: ML fraud alert PRD"},
+];
+
+let currentItem = null;
+let currentMode = 'all';
+
+function buildTimeline(mode) {
+  const inner = document.getElementById('tl-inner');
+  inner.innerHTML = '';
+
+  for(let i=0;i<10;i++){
+    const e1 = EMAILS[i*2];
+    const e2 = EMAILS[i*2+1];
+    const cp = CHECKPOINTS[i];
+
+    const pair = document.createElement('div');
+    pair.className = 'pair';
+
+    if(mode !== 'cp') {
+      const emailRow = document.createElement('div');
+      emailRow.className = 'pair-emails';
+
+      const n1 = makeEmailNode(e1);
+      emailRow.appendChild(n1);
+
+      const arr = document.createElement('div');
+      arr.className = 'arrow-h';
+      arr.innerHTML = `<svg viewBox="0 0 16 16"><path d="M2 8h10M9 5l3 3-3 3" stroke="var(--color-text-tertiary)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      emailRow.appendChild(arr);
+
+      const n2 = makeEmailNode(e2);
+      emailRow.appendChild(n2);
+
+      pair.appendChild(emailRow);
+    }
+
+    if(mode !== 'email') {
+      if(mode !== 'cp') {
+        const cpArrow = document.createElement('div');
+        cpArrow.className = 'cp-arrow';
+        cpArrow.innerHTML = `<svg viewBox="0 0 14 14"><path d="M7 2v8M4 7l3 3 3-3" stroke="#BA7517" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        pair.appendChild(cpArrow);
+      }
+      const cpNode = makeCpNode(cp);
+      pair.appendChild(cpNode);
+    }
+
+    inner.appendChild(pair);
+
+    if(i < 9) {
+      const sep = document.createElement('div');
+      sep.className = 'arrow-h';
+      sep.style.cssText = 'padding:0;align-self:center;margin-top:'+(mode==='cp'?'0':'-32px');
+      sep.innerHTML = `<svg viewBox="0 0 16 16" style="width:20px;height:20px"><path d="M2 8h10M9 5l3 3-3 3" stroke="var(--color-text-tertiary)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      inner.appendChild(sep);
+    }
+  }
+}
+
+function makeEmailNode(e) {
+  const d = document.createElement('div');
+  d.className = 'e-node';
+  d.style.borderTopColor = MOD_COLORS[e.mod];
+  d.style.borderTopWidth = '2px';
+  d.innerHTML = `<div class="num">E${String(e.n).padStart(2,'0')}</div><div class="title">${e.title}</div><div class="mod" style="color:${MOD_COLORS[e.mod]};font-size:10px">${MOD_NAMES[e.mod]}</div>`;
+  d.onclick = () => showDetail('email', e);
+  return d;
+}
+
+function makeCpNode(cp) {
+  const d = document.createElement('div');
+  d.className = 'cp-node';
+  d.innerHTML = `<div class="num">CP${String(cp.n).padStart(2,'0')}</div><div class="title">${cp.title}</div><div class="badge">checkpoint</div>`;
+  d.onclick = () => showDetail('cp', cp);
+  return d;
+}
+
+function showDetail(type, item) {
+  currentItem = {type, item};
+  const det = document.getElementById('detail');
+  det.classList.add('show');
+  if(type === 'email') {
+    document.getElementById('dt-badge').innerHTML = `<span style="background:${MOD_COLORS[item.mod]}22;color:${MOD_COLORS[item.mod]};padding:2px 8px;border-radius:10px;font-size:10px">Email ${String(item.n).padStart(2,'0')} · ${MOD_NAMES[item.mod]}</span>`;
+    document.getElementById('dt-title').textContent = item.title;
+    document.getElementById('dt-sub').textContent = item.sub;
+  } else {
+    document.getElementById('dt-badge').innerHTML = `<span style="background:#FAEEDA;color:#633806;padding:2px 8px;border-radius:10px;font-size:10px">Checkpoint ${String(item.n).padStart(2,'0')} · Consolidation</span>`;
+    document.getElementById('dt-title').textContent = item.title;
+    document.getElementById('dt-sub').textContent = item.sub;
+  }
+}
+
+function askMore() {
+  if(!currentItem) return;
+  const {type, item} = currentItem;
+  if(type === 'email') {
+    sendPrompt(`Tell me more about Email ${item.n}: ${item.title} — and how it connects to what came before it`);
+  } else {
+    sendPrompt(`Tell me more about Checkpoint ${item.n}: ${item.title} — what scenario does it test?`);
+  }
+}
+
+function filter(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.tog').forEach(b => b.classList.remove('on'));
+  document.getElementById('tog-'+mode).classList.add('on');
+  buildTimeline(mode);
+}
+
+buildTimeline('all');
+</script>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Model Comparison — Agents & Multi-Agent Systems</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1a1a1a;background:#f5f4f0;min-height:100vh;padding:32px 16px}
+.container{max-width:760px;margin:0 auto}
+h1{font-size:22px;font-weight:500;margin-bottom:4px}
+.subtitle{font-size:14px;color:#6b6b68;margin-bottom:24px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px;padding:10px 14px;border:0.5px solid #d3d1c7;border-radius:8px;background:#f1efe8}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:#6b6b68}
+.legend-dot{width:8px;height:8px;border-radius:50%}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:center}
+.controls select{font-size:12px;padding:5px 10px;border-radius:20px;border:0.5px solid #b4b2a9;background:#fff;color:#1a1a1a;cursor:pointer}
+.filter-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.pill{font-size:11px;padding:4px 10px;border-radius:20px;border:0.5px solid #b4b2a9;background:#fff;color:#5f5e5a;cursor:pointer;transition:all .15s}
+.pill:hover{background:#f1efe8}
+.pill.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.results-count{font-size:12px;color:#9c9a92;margin-bottom:10px}
+.model-card{border:0.5px solid #d3d1c7;border-radius:12px;padding:14px 16px;margin-bottom:10px;background:#fff}
+.model-card.recommended{border:1.5px solid #378add}
+.card-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+.origin-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.model-name{font-size:14px;font-weight:500;margin-bottom:2px}
+.model-meta{font-size:12px;color:#6b6b68}
+.badges{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.badge{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:400;white-space:nowrap}
+.b-blue{background:#e6f1fb;color:#185fa5}
+.b-green{background:#eaf3de;color:#3b6d11}
+.b-amber{background:#faeeda;color:#854f0b}
+.b-red{background:#fcebeb;color:#a32d2d}
+.b-gray{background:#f1efe8;color:#5f5e5a;border:0.5px solid #d3d1c7}
+.b-rec{background:#e6f1fb;color:#185fa5;border:0.5px solid #b5d4f4}
+.ratings{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.rating-item{display:flex;flex-direction:column;gap:3px}
+.rating-label{font-size:10px;color:#9c9a92}
+.rating-bar{height:4px;background:#f1efe8;border-radius:2px;overflow:hidden}
+.rating-fill{height:100%;border-radius:2px}
+.rating-val{font-size:11px;font-weight:500}
+.use-cases{font-size:12px;color:#6b6b68;line-height:1.5;border-top:0.5px solid #d3d1c7;padding-top:8px}
+.use-cases strong{color:#1a1a1a;font-weight:500}
+.no-results{font-size:13px;color:#9c9a92;padding:20px 0;text-align:center}
+@media(max-width:500px){.ratings{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>AI Model Comparison</h1>
+<p class="subtitle">For agents &amp; multi-agent systems — filter by role, sort by dimension</p>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#185FA5"></div>US / Western</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#1D9E75"></div>Chinese</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#854F0B"></div>European</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#993C1D"></div>Open source</div>
+</div>
+
+<div class="controls">
+  <select id="sort-select" onchange="render()">
+    <option value="default">Sort: default (recommended first)</option>
+    <option value="speed">Sort: speed</option>
+    <option value="quality">Sort: quality</option>
+    <option value="value">Sort: value</option>
+    <option value="context">Sort: context window</option>
+  </select>
+  <select id="origin-select" onchange="render()">
+    <option value="all">All origins</option>
+    <option value="us">US / Western</option>
+    <option value="cn">Chinese</option>
+    <option value="eu">European</option>
+    <option value="os">Open source</option>
+  </select>
+</div>
+
+<div class="filter-pills" id="use-pills"></div>
+<div class="results-count" id="count"></div>
+<div id="cards"></div>
+</div>
+
+<script>
+const USE_CASES=["orchestrator","subagent","fast router","reasoning","coding","multimodal","long context","RAG","local/private","low cost","customer support","tool use","multilingual","creative","data analysis"];
+const MODELS=[
+  {name:"Claude Opus 4",provider:"Anthropic",origin:"us",speed:2,quality:10,value:4,context:"200k",rec:true,badges:[{l:"Best reasoning",c:"b-blue"},{l:"Complex agents",c:"b-blue"},{l:"High cost",c:"b-amber"}],use:["orchestrator","reasoning","coding","tool use","data analysis"],note:"Best-in-class for orchestrator agents, complex multi-step reasoning, and long-horizon tasks. Extended thinking mode available. Use when quality > cost."},
+  {name:"Claude Sonnet 4.5",provider:"Anthropic",origin:"us",speed:7,quality:9,value:8,context:"200k",rec:true,badges:[{l:"Best value",c:"b-green"},{l:"Strong tool use",c:"b-blue"},{l:"Recommended default",c:"b-rec"}],use:["orchestrator","subagent","coding","tool use","RAG","data analysis","customer support"],note:"The best default for most agent builds. Strong reasoning at moderate cost. Excellent at structured outputs and tool calling. The workhorse of multi-agent pipelines."},
+  {name:"Claude Haiku 3.5",provider:"Anthropic",origin:"us",speed:10,quality:7,value:10,context:"200k",rec:false,badges:[{l:"Fastest Claude",c:"b-green"},{l:"Very low cost",c:"b-green"},{l:"High volume",c:"b-blue"}],use:["fast router","subagent","customer support","low cost","RAG"],note:"Ideal sub-agent for classification, routing, summarisation, and simple Q&A. Use as the workhorse for cheap, high-volume tasks within a pipeline."},
+  {name:"GPT-4o",provider:"OpenAI",origin:"us",speed:7,quality:9,value:7,context:"128k",rec:false,badges:[{l:"Strong vision",c:"b-blue"},{l:"Multimodal",c:"b-blue"},{l:"Large ecosystem",c:"b-gray"}],use:["orchestrator","multimodal","coding","tool use","data analysis","customer support"],note:"Well-rounded frontier model. Strong multimodal capabilities (image + audio). Massive plugin/tool ecosystem. Good for image-understanding agents."},
+  {name:"GPT-4o mini",provider:"OpenAI",origin:"us",speed:9,quality:7,value:9,context:"128k",rec:false,badges:[{l:"Low cost",c:"b-green"},{l:"Fast",c:"b-blue"},{l:"Solid general use",c:"b-gray"}],use:["fast router","subagent","customer support","low cost","RAG"],note:"OpenAI's budget tier. Comparable to Haiku for simple tasks. Good for classification, summarisation, and triage sub-agents in OpenAI-native stacks."},
+  {name:"o3",provider:"OpenAI",origin:"us",speed:2,quality:10,value:3,context:"200k",rec:false,badges:[{l:"Best math/logic",c:"b-blue"},{l:"Slow",c:"b-amber"},{l:"Very expensive",c:"b-red"}],use:["reasoning","coding","data analysis"],note:"OpenAI's reasoning-focused model. Exceptional at STEM tasks, formal logic, and competitive programming. Not suitable for real-time agents — use for async deep-reasoning steps."},
+  {name:"o4-mini",provider:"OpenAI",origin:"us",speed:6,quality:8,value:7,context:"200k",rec:false,badges:[{l:"Reasoning at speed",c:"b-blue"},{l:"Better value",c:"b-green"},{l:"Coding strong",c:"b-blue"}],use:["reasoning","coding","subagent","tool use"],note:"A faster, cheaper reasoning model. Hits 90% of o3's performance at a fraction of the cost. Good sub-agent for tasks that need structured thinking without full o3 cost."},
+  {name:"Gemini 2.0 Flash",provider:"Google DeepMind",origin:"us",speed:10,quality:7,value:10,context:"1M",rec:false,badges:[{l:"1M context",c:"b-blue"},{l:"Very fast",c:"b-green"},{l:"Multimodal",c:"b-blue"}],use:["fast router","long context","multimodal","RAG","subagent","low cost"],note:"Exceptional context window at very low cost. Ideal for ingesting entire codebases, large documents, or long conversation histories. Fast enough for real-time use."},
+  {name:"Gemini 1.5 Pro",provider:"Google DeepMind",origin:"us",speed:5,quality:8,value:7,context:"2M",rec:false,badges:[{l:"2M context",c:"b-blue"},{l:"Multimodal",c:"b-blue"},{l:"Google ecosystem",c:"b-gray"}],use:["long context","multimodal","RAG","data analysis","orchestrator"],note:"Industry-leading 2M token context. Best for document-heavy pipelines where you need to fit entire libraries into one prompt. Deep Google Workspace integration."},
+  {name:"Gemini 2.5 Pro",provider:"Google DeepMind",origin:"us",speed:4,quality:9,value:7,context:"1M",rec:false,badges:[{l:"Strong reasoning",c:"b-blue"},{l:"Code-first",c:"b-blue"},{l:"1M context",c:"b-blue"}],use:["reasoning","coding","orchestrator","data analysis","long context"],note:"Google's latest frontier model. Competitive with Claude/GPT on reasoning benchmarks. Strong coding and data analysis. Good for Google Cloud-native agent stacks."},
+  {name:"DeepSeek R1",provider:"DeepSeek",origin:"cn",speed:3,quality:9,value:9,context:"128k",rec:true,badges:[{l:"Open source",c:"b-green"},{l:"Near-frontier quality",c:"b-blue"},{l:"Low API cost",c:"b-green"}],use:["reasoning","coding","data analysis","local/private","low cost"],note:"Breakthrough open-source reasoning model from China. Matches o1-level performance on STEM at a fraction of the cost. Can be self-hosted for privacy-conscious teams."},
+  {name:"DeepSeek V3",provider:"DeepSeek",origin:"cn",speed:7,quality:9,value:10,context:"128k",rec:true,badges:[{l:"Exceptional value",c:"b-green"},{l:"GPT-4 quality",c:"b-blue"},{l:"Open weights",c:"b-green"}],use:["orchestrator","subagent","coding","tool use","low cost","RAG"],note:"DeepSeek's general-purpose flagship. GPT-4 class performance at dramatically lower cost. Available via API and as open weights. Strong coding and instruction following."},
+  {name:"DeepSeek R1-Distill (7B–70B)",provider:"DeepSeek",origin:"cn",speed:8,quality:7,value:10,context:"32k",rec:false,badges:[{l:"Run locally",c:"b-green"},{l:"Reasoning capable",c:"b-blue"},{l:"Zero API cost",c:"b-green"}],use:["local/private","low cost","reasoning","coding","subagent"],note:"Distilled versions of R1 in smaller sizes. The 70B version is surprisingly capable for local deployment. Great for privacy-first pipelines where data cannot leave your machine."},
+  {name:"Qwen 2.5 72B",provider:"Alibaba",origin:"cn",speed:6,quality:8,value:9,context:"128k",rec:false,badges:[{l:"Strong Chinese",c:"b-blue"},{l:"Open weights",c:"b-green"},{l:"Multilingual",c:"b-blue"}],use:["multilingual","coding","subagent","local/private","low cost","RAG"],note:"Alibaba's best open-source model. Excellent multilingual performance especially for Chinese, Japanese, Korean. Strong coding. Available as open weights for self-hosting."},
+  {name:"Qwen 2.5-Coder 32B",provider:"Alibaba",origin:"cn",speed:7,quality:8,value:9,context:"128k",rec:false,badges:[{l:"Code-specialised",c:"b-blue"},{l:"Open weights",c:"b-green"},{l:"Strong autocomplete",c:"b-blue"}],use:["coding","subagent","local/private","low cost"],note:"One of the best open-source coding models. Comparable to GPT-4o for code generation and debugging. Can be self-hosted for code-heavy agent pipelines needing data privacy."},
+  {name:"Qwen QwQ-32B",provider:"Alibaba",origin:"cn",speed:4,quality:8,value:9,context:"32k",rec:false,badges:[{l:"Open reasoning model",c:"b-blue"},{l:"Self-hostable",c:"b-green"},{l:"Good value",c:"b-green"}],use:["reasoning","coding","local/private","low cost"],note:"Alibaba's open-source reasoning model. Chain-of-thought style like DeepSeek R1. Good alternative for teams wanting a reasoning sub-agent without paying API fees."},
+  {name:"Baidu ERNIE 4.5",provider:"Baidu",origin:"cn",speed:6,quality:7,value:7,context:"128k",rec:false,badges:[{l:"Chinese specialist",c:"b-blue"},{l:"Baidu ecosystem",c:"b-gray"},{l:"Enterprise focus",c:"b-gray"}],use:["multilingual","customer support","RAG","tool use"],note:"Baidu's flagship LLM. Deep integration with Baidu's search, maps, and enterprise cloud. Best suited for agents deployed in the Chinese market requiring Baidu platform integrations."},
+  {name:"Zhipu GLM-4",provider:"Zhipu AI",origin:"cn",speed:6,quality:7,value:8,context:"128k",rec:false,badges:[{l:"Chinese language",c:"b-blue"},{l:"Multimodal",c:"b-blue"},{l:"API available",c:"b-gray"}],use:["multilingual","customer support","multimodal","subagent"],note:"Strong general-purpose Chinese model from Tsinghua spin-off. Good multimodal support. Popular in Chinese enterprise applications and RAG deployments."},
+  {name:"Moonshot Kimi k1.5",provider:"Moonshot AI",origin:"cn",speed:4,quality:8,value:8,context:"128k",rec:false,badges:[{l:"Long context",c:"b-blue"},{l:"Reasoning",c:"b-blue"},{l:"Chinese market",c:"b-gray"}],use:["reasoning","long context","RAG","multilingual","data analysis"],note:"Strong reasoning model with excellent long-context handling. Competitive on Chinese benchmarks. Good for document-heavy Chinese-language agent pipelines."},
+  {name:"MiniMax MoE",provider:"MiniMax",origin:"cn",speed:7,quality:7,value:9,context:"1M",rec:false,badges:[{l:"1M context",c:"b-blue"},{l:"MoE architecture",c:"b-gray"},{l:"Low cost",c:"b-green"}],use:["long context","low cost","RAG","multilingual","subagent"],note:"Uses Mixture-of-Experts (MoE) architecture for efficiency. Very long context at low cost. Good for document ingestion pipelines in Chinese/Asian markets."},
+  {name:"Mistral Large 2",provider:"Mistral AI",origin:"eu",speed:6,quality:8,value:8,context:"128k",rec:false,badges:[{l:"GDPR-friendly",c:"b-blue"},{l:"EU hosted",c:"b-gray"},{l:"Strong reasoning",c:"b-blue"}],use:["orchestrator","subagent","coding","tool use","multilingual","customer support"],note:"Best option for EU-regulated deployments. Hosted on European infrastructure. Strong multilingual performance across European languages. GDPR-compliant by design."},
+  {name:"Mistral Small 3",provider:"Mistral AI",origin:"eu",speed:9,quality:7,value:9,context:"32k",rec:false,badges:[{l:"Very fast",c:"b-green"},{l:"Low cost",c:"b-green"},{l:"GDPR-friendly",c:"b-blue"}],use:["fast router","subagent","low cost","customer support","multilingual"],note:"Mistral's budget tier. Fast and cheap for EU teams. Good for routing, classification, and simple Q&A sub-agents where data residency in Europe matters."},
+  {name:"Mistral Codestral",provider:"Mistral AI",origin:"eu",speed:8,quality:8,value:9,context:"32k",rec:false,badges:[{l:"Code-specialist",c:"b-blue"},{l:"EU hosted",c:"b-gray"},{l:"Fast",c:"b-green"}],use:["coding","subagent","low cost"],note:"Mistral's code-specialised model. Strong at code generation, completion, and fill-in-the-middle tasks. EU-hosted. Good for coding sub-agents in GDPR-sensitive stacks."},
+  {name:"Llama 3.3 70B",provider:"Meta",origin:"os",speed:6,quality:8,value:10,context:"128k",rec:true,badges:[{l:"Best open-source general",c:"b-green"},{l:"Self-hostable",c:"b-green"},{l:"Zero API cost",c:"b-green"}],use:["local/private","low cost","orchestrator","subagent","coding","multilingual","RAG"],note:"Meta's best general-purpose open model. Near-frontier quality. Self-hosted = zero per-call cost and full data control. The default recommendation for privacy-first or high-volume pipelines."},
+  {name:"Llama 3.2 Vision 11B/90B",provider:"Meta",origin:"os",speed:7,quality:7,value:10,context:"128k",rec:false,badges:[{l:"Open vision model",c:"b-green"},{l:"Self-hostable",c:"b-green"},{l:"Image understanding",c:"b-blue"}],use:["multimodal","local/private","low cost","subagent"],note:"Meta's open multimodal model. Can process images and text locally. Good for document OCR, receipt parsing, and image-understanding sub-agents without external APIs."},
+  {name:"Phi-4",provider:"Microsoft",origin:"os",speed:9,quality:7,value:10,context:"16k",rec:false,badges:[{l:"Tiny but capable",c:"b-blue"},{l:"Runs on CPU",c:"b-green"},{l:"Strong reasoning",c:"b-blue"}],use:["local/private","low cost","fast router","subagent","reasoning"],note:"Microsoft's small but punchy model. Surprisingly strong reasoning for its size. Runs on laptops and edge devices. Good for on-device agents where cloud calls aren't possible."},
+  {name:"Gemma 2 27B",provider:"Google",origin:"os",speed:7,quality:7,value:10,context:"8k",rec:false,badges:[{l:"Open weights",c:"b-green"},{l:"Google quality",c:"b-blue"},{l:"Efficient",c:"b-gray"}],use:["local/private","low cost","subagent","fast router"],note:"Google's open-weight model. Good quality-to-size ratio. Runs on consumer hardware. Useful as a local sub-agent for tasks that don't need frontier performance."},
+  {name:"Command R+",provider:"Cohere",origin:"us",speed:6,quality:8,value:8,context:"128k",rec:false,badges:[{l:"RAG-optimised",c:"b-blue"},{l:"Grounding built-in",c:"b-blue"},{l:"Enterprise",c:"b-gray"}],use:["RAG","tool use","orchestrator","customer support","data analysis"],note:"Purpose-built for RAG and retrieval-heavy pipelines. Native grounding and citation generation. Strong tool use. Best model in its class for enterprise knowledge base agents."},
+  {name:"Cohere Embed v3",provider:"Cohere",origin:"us",speed:9,quality:9,value:8,context:"512 tokens",rec:false,badges:[{l:"Embedding specialist",c:"b-blue"},{l:"Multilingual",c:"b-blue"},{l:"RAG",c:"b-blue"}],use:["RAG","multilingual","data analysis"],note:"One of the best embedding models available. Not a generative model — use specifically for embedding text into vectors for RAG pipelines. Excellent multilingual support."},
+  {name:"Perplexity Sonar Large",provider:"Perplexity",origin:"us",speed:7,quality:7,value:8,context:"128k",rec:false,badges:[{l:"Live web search",c:"b-blue"},{l:"Grounded",c:"b-blue"},{l:"Real-time",c:"b-green"}],use:["RAG","subagent","customer support","data analysis"],note:"Uniquely combines LLM with live web search. Every response is grounded in real-time search results. Ideal as a search sub-agent that answers with current information and citations."},
+  {name:"Yi-Large",provider:"01.AI",origin:"cn",speed:6,quality:7,value:8,context:"200k",rec:false,badges:[{l:"200k context",c:"b-blue"},{l:"Chinese specialist",c:"b-blue"},{l:"Good value",c:"b-green"}],use:["multilingual","long context","RAG","subagent"],note:"From Kai-Fu Lee's 01.AI. Strong Chinese/English bilingual performance with a generous 200k context window. Good for long-document Chinese-language RAG pipelines."},
+  {name:"Doubao (ByteDance)",provider:"ByteDance",origin:"cn",speed:8,quality:7,value:9,context:"128k",rec:false,badges:[{l:"Fast",c:"b-green"},{l:"ByteDance ecosystem",c:"b-gray"},{l:"Chinese market",c:"b-blue"}],use:["multilingual","customer support","fast router","low cost"],note:"ByteDance's enterprise LLM used internally in TikTok/Douyin workflows. Strong Chinese-language performance at low cost. Best suited for Chinese-market customer-facing agents."}
+];
+
+const ORIGIN_COLORS={us:"#185FA5",cn:"#1D9E75",eu:"#854F0B",os:"#993C1D"};
+const RATING_COLORS={speed:"#1D9E75",quality:"#185FA5",value:"#BA7517"};
+let activeFilters=new Set();
+
+function initPills(){
+  const c=document.getElementById("use-pills");
+  USE_CASES.forEach(u=>{
+    const b=document.createElement("button");
+    b.className="pill";b.textContent=u;
+    b.onclick=()=>{
+      if(activeFilters.has(u))activeFilters.delete(u);
+      else activeFilters.add(u);
+      b.classList.toggle("active",activeFilters.has(u));
+      render();
+    };
+    c.appendChild(b);
+  });
+}
+
+function render(){
+  const sort=document.getElementById("sort-select").value;
+  const origin=document.getElementById("origin-select").value;
+  let models=MODELS.filter(m=>{
+    if(origin!=="all"&&m.origin!==origin)return false;
+    if(activeFilters.size>0&&![...activeFilters].every(f=>m.use.includes(f)))return false;
+    return true;
+  });
+  if(sort==="speed")models.sort((a,b)=>b.speed-a.speed);
+  else if(sort==="quality")models.sort((a,b)=>b.quality-a.quality);
+  else if(sort==="value")models.sort((a,b)=>b.value-a.value);
+  else if(sort==="context")models.sort((a,b)=>{
+    const p=s=>{if(s.includes("M"))return parseFloat(s)*1000000;if(s.includes("k"))return parseFloat(s)*1000;return parseInt(s)||0};
+    return p(b.context)-p(a.context);
+  });
+  else models.sort((a,b)=>(b.rec?1:0)-(a.rec?1:0));
+
+  document.getElementById("count").textContent=models.length+" model"+(models.length!==1?"s":"")+" shown";
+  const container=document.getElementById("cards");
+  if(!models.length){container.innerHTML='<div class="no-results">No models match the selected filters.</div>';return;}
+
+  container.innerHTML=models.map(m=>{
+    const bar=(v,col)=>`<div class="rating-bar"><div class="rating-fill" style="width:${v*10}%;background:${col}"></div></div><div class="rating-val" style="color:${col}">${v}/10</div>`;
+    return `<div class="model-card${m.rec?" recommended":""}">
+      <div class="card-top">
+        <div class="origin-dot" style="background:${ORIGIN_COLORS[m.origin]}"></div>
+        <div style="flex:1">
+          <div class="model-name">${m.name}${m.rec?' <span class="badge b-rec" style="font-size:10px;padding:1px 6px;vertical-align:middle">recommended</span>':''}</div>
+          <div class="model-meta">${m.provider} &middot; Context: ${m.context}</div>
+          <div class="badges">${m.badges.map(b=>`<span class="badge ${b.c}">${b.l}</span>`).join("")}</div>
+        </div>
+      </div>
+      <div class="ratings">
+        <div class="rating-item"><div class="rating-label">Speed</div>${bar(m.speed,RATING_COLORS.speed)}</div>
+        <div class="rating-item"><div class="rating-label">Quality</div>${bar(m.quality,RATING_COLORS.quality)}</div>
+        <div class="rating-item"><div class="rating-label">Value</div>${bar(m.value,RATING_COLORS.value)}</div>
+        <div class="rating-item"><div class="rating-label">Context</div><div style="font-size:12px;font-weight:500;margin-top:3px">${m.context}</div></div>
+      </div>
+      <div class="use-cases"><strong>Best for:</strong> ${m.use.join(", ")} &mdash; ${m.note}</div>
+    </div>`;
+  }).join("");
+}
+
+initPills();render();
+</script>
+</body>
+</html>
