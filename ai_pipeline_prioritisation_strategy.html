@@ -1,0 +1,611 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)}
+
+/* nav */
+.nav{display:flex;gap:4px;margin-bottom:1.5rem;border-bottom:0.5px solid var(--color-border-tertiary);padding-bottom:1px}
+.nav-btn{padding:8px 14px;font-size:12px;font-weight:500;background:none;border:none;cursor:pointer;color:var(--color-text-secondary);border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+.nav-btn.active{color:var(--color-text-primary);border-bottom-color:var(--color-text-primary)}
+.nav-btn:hover:not(.active){color:var(--color-text-primary);background:var(--color-background-secondary)}
+.tab{display:none}.tab.active{display:block}
+
+/* chips */
+.chip{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;border:0.5px solid}
+.c-green{background:#EAF3DE;color:#27500A;border-color:#97C459}
+.c-amber{background:#FAEEDA;color:#633806;border-color:#EF9F27}
+.c-red{background:#FCEBEB;color:#791F1F;border-color:#F09595}
+.c-blue{background:#E6F1FB;color:#0C447C;border-color:#85B7EB}
+.c-teal{background:#E1F5EE;color:#085041;border-color:#5DCAA5}
+.c-purple{background:#EEEDFE;color:#3C3489;border-color:#AFA9EC}
+.c-coral{background:#FAECE7;color:#712B13;border-color:#F0997B}
+.c-gray{background:#F1EFE8;color:#444441;border-color:#B4B2A9}
+@media(prefers-color-scheme:dark){
+  .c-green{background:#173404;color:#C0DD97;border-color:#3B6D11}
+  .c-amber{background:#412402;color:#FAC775;border-color:#BA7517}
+  .c-red{background:#501313;color:#F7C1C1;border-color:#A32D2D}
+  .c-blue{background:#042C53;color:#B5D4F4;border-color:#185FA5}
+  .c-teal{background:#04342C;color:#9FE1CB;border-color:#0F6E56}
+  .c-purple{background:#26215C;color:#CECBF6;border-color:#534AB7}
+  .c-coral{background:#4A1B0C;color:#F5C4B3;border-color:#993C1D}
+  .c-gray{background:#2C2C2A;color:#D3D1C7;border-color:#5F5E5A}
+}
+
+/* section headings */
+.sec-label{font-size:10px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--color-text-tertiary);margin-bottom:.6rem}
+.sec-title{font-size:15px;font-weight:500;color:var(--color-text-primary);margin-bottom:.3rem}
+.sec-sub{font-size:13px;color:var(--color-text-secondary);line-height:1.6;margin-bottom:1.25rem}
+
+/* cards */
+.card{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;background:var(--color-background-primary)}
+.card+.card{margin-top:.75rem}
+
+/* grids */
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem}
+.g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.75rem}
+
+/* matrix */
+.matrix-wrap{position:relative;width:100%;aspect-ratio:1/0.85;max-width:600px;margin:0 auto}
+.matrix-canvas{width:100%;height:100%}
+
+/* agent cards */
+.agent-card{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:11px 14px;cursor:pointer;transition:background .15s;position:relative}
+.agent-card:hover{background:var(--color-background-secondary)}
+.agent-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px}
+.agent-name{font-size:13px;font-weight:500;color:var(--color-text-primary);line-height:1.3}
+.agent-tag{font-size:10px;font-weight:500;padding:2px 7px;border-radius:20px;border:0.5px solid;white-space:nowrap}
+.agent-who{font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px}
+.agent-desc{font-size:11px;color:var(--color-text-secondary);line-height:1.5}
+.rank-badge{position:absolute;top:-8px;left:-8px;width:20px;height:20px;border-radius:50%;font-size:10px;font-weight:500;display:flex;align-items:center;justify-content:center;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);color:var(--color-text-primary)}
+
+/* change mgmt */
+.problem-card{border:0.5px solid var(--color-border-tertiary);border-left:3px solid;border-radius:var(--border-radius-md);padding:12px 14px;margin-bottom:.6rem}
+.problem-title{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+.problem-root{font-size:11px;color:var(--color-text-secondary);line-height:1.5;margin-bottom:8px}
+.interventions{display:flex;flex-direction:column;gap:4px}
+.intervention{font-size:11px;color:var(--color-text-secondary);display:flex;gap:6px;line-height:1.4}
+.int-dot{width:5px;height:5px;border-radius:50%;margin-top:5px;flex-shrink:0}
+
+/* decision tree */
+.dt-node{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:8px 12px;font-size:12px;text-align:center}
+.dt-q{background:var(--color-background-secondary);font-weight:500}
+.dt-yes{border-color:#97C459;background:#EAF3DE;color:#27500A}
+.dt-no{border-color:#EF9F27;background:#FAEEDA;color:#633806}
+.dt-hold{border-color:#F09595;background:#FCEBEB;color:#791F1F}
+@media(prefers-color-scheme:dark){
+  .dt-yes{background:#173404;color:#C0DD97;border-color:#3B6D11}
+  .dt-no{background:#412402;color:#FAC775;border-color:#BA7517}
+  .dt-hold{background:#501313;color:#F7C1C1;border-color:#A32D2D}
+}
+.dt-label{font-size:10px;color:var(--color-text-tertiary);text-align:center;margin-top:2px}
+.dt-arrow{text-align:center;color:var(--color-text-tertiary);font-size:12px;line-height:1;padding:2px 0}
+.dt-row{display:flex;gap:.5rem;align-items:flex-start}
+.dt-col{display:flex;flex-direction:column;gap:2px;flex:1}
+
+/* score bars */
+.score-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.score-label{font-size:11px;color:var(--color-text-secondary);min-width:90px}
+.score-bar-bg{flex:1;height:6px;background:var(--color-background-secondary);border-radius:3px;overflow:hidden;border:0.5px solid var(--color-border-tertiary)}
+.score-bar{height:100%;border-radius:3px;transition:width .4s}
+.score-val{font-size:11px;font-weight:500;min-width:24px;text-align:right}
+
+/* table */
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{background:var(--color-background-secondary);font-weight:500;font-size:11px;color:var(--color-text-secondary);text-align:left;padding:7px 10px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.tbl td{padding:6px 10px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary);vertical-align:top}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--color-background-secondary)}
+.tbl-wrap{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);overflow:hidden}
+
+/* phase timeline */
+.phase-row{display:flex;gap:0;margin-top:.75rem}
+.phase-block{flex:1;padding:10px 12px;border:0.5px solid var(--color-border-tertiary);border-right:none;font-size:11px}
+.phase-block:first-child{border-radius:var(--border-radius-md) 0 0 var(--border-radius-md)}
+.phase-block:last-child{border-right:0.5px solid var(--color-border-tertiary);border-radius:0 var(--border-radius-md) var(--border-radius-md) 0}
+.phase-num{font-size:10px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px}
+.phase-name{font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+.phase-items{display:flex;flex-direction:column;gap:3px}
+.phase-item{font-size:11px;color:var(--color-text-secondary);display:flex;gap:5px;align-items:flex-start;line-height:1.3}
+.pi-dot{width:4px;height:4px;border-radius:50%;margin-top:4px;flex-shrink:0}
+
+/* divider */
+hr{border:none;border-top:0.5px solid var(--color-border-tertiary);margin:1.5rem 0}
+</style>
+
+<div style="padding:1.5rem 0">
+
+<div class="nav" id="nav">
+  <button class="nav-btn active" onclick="switchTab('matrix')">Priority Matrix</button>
+  <button class="nav-btn" onclick="switchTab('portfolio')">Agent Portfolio</button>
+  <button class="nav-btn" onclick="switchTab('change')">Change Management</button>
+  <button class="nav-btn" onclick="switchTab('roadmap')">Execution Roadmap</button>
+</div>
+
+<!-- ═══════════ TAB 1: MATRIX ═══════════ -->
+<div class="tab active" id="tab-matrix">
+  <div class="sec-label">Tab 1 of 4 · Prioritisation framework</div>
+  <div class="sec-title">Impact vs Effort — Agent Priority Matrix</div>
+  <div class="sec-sub">Agents plotted by strategic impact (y-axis) and implementation effort (x-axis). Bubble size = stakeholder visibility. Click any agent for details.</div>
+
+  <svg width="100%" viewBox="0 0 640 480" role="img" style="max-width:640px;display:block;margin:0 auto">
+    <title>Agent Priority Matrix — Impact vs Effort</title>
+    <desc>2x2 matrix showing all agents plotted by impact and effort, with quadrant labels</desc>
+    <defs>
+      <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker>
+    </defs>
+
+    <!-- axes background quadrants -->
+    <!-- Q1: High impact, low effort = DO NOW (top-left) -->
+    <rect x="60" y="40" width="255" height="195" fill="#EAF3DE" opacity=".35" rx="0"/>
+    <!-- Q2: High impact, high effort = PLAN (top-right) -->
+    <rect x="315" y="40" width="265" height="195" fill="#E6F1FB" opacity=".3" rx="0"/>
+    <!-- Q3: Low impact, low effort = OPPORTUNISTIC (bottom-left) -->
+    <rect x="60" y="235" width="255" height="195" fill="#FAEEDA" opacity=".25" rx="0"/>
+    <!-- Q4: Low impact, high effort = DEPRIORITISE (bottom-right) -->
+    <rect x="315" y="235" width="265" height="195" fill="#FCEBEB" opacity=".2" rx="0"/>
+
+    <!-- quadrant labels -->
+    <text x="80" y="62" class="ts" fill="#27500A" font-size="11" font-weight="500">DO NOW</text>
+    <text x="80" y="76" class="ts" fill="#3B6D11" font-size="10">High impact · Low effort</text>
+    <text x="335" y="62" class="ts" fill="#0C447C" font-size="11" font-weight="500">PLAN CAREFULLY</text>
+    <text x="335" y="76" class="ts" fill="#185FA5" font-size="10">High impact · High effort</text>
+    <text x="80" y="255" class="ts" fill="#633806" font-size="11" font-weight="500">OPPORTUNISTIC</text>
+    <text x="80" y="269" class="ts" fill="#854F0B" font-size="10">Low impact · Low effort</text>
+    <text x="335" y="255" class="ts" fill="#791F1F" font-size="11" font-weight="500">DEPRIORITISE / DEFER</text>
+    <text x="335" y="269" class="ts" fill="#A32D2D" font-size="10">Low impact · High effort</text>
+
+    <!-- grid lines -->
+    <line x1="60" y1="235" x2="580" y2="235" stroke="var(--color-border-tertiary)" stroke-width="1" stroke-dasharray="4 3"/>
+    <line x1="315" y1="40" x2="315" y2="430" stroke="var(--color-border-tertiary)" stroke-width="1" stroke-dasharray="4 3"/>
+    <!-- border -->
+    <rect x="60" y="40" width="520" height="390" fill="none" stroke="var(--color-border-tertiary)" stroke-width="0.5"/>
+
+    <!-- axes labels -->
+    <text x="320" y="446" text-anchor="middle" font-size="11" font-weight="500" fill="var(--color-text-secondary)">← Low effort · · · High effort →</text>
+    <text x="22" y="240" text-anchor="middle" font-size="11" font-weight="500" fill="var(--color-text-secondary)" transform="rotate(-90,22,240)">← Low impact · · · High impact →</text>
+
+    <!-- ── AGENTS (cx, cy, r, color, label, sublabel) ── -->
+    <!-- DO NOW quadrant -->
+    <!-- Reporting PPT Agent -->
+    <g class="node" onclick="sendPrompt('Tell me more about how to build the Reporting PPT Agent for Gin')">
+      <circle cx="130" cy="90" r="22" fill="#1D9E75" opacity=".85" stroke="#085041" stroke-width="0.5"/>
+      <text x="130" y="87" text-anchor="middle" font-size="10" font-weight="500" fill="white">PPT</text>
+      <text x="130" y="99" text-anchor="middle" font-size="9" fill="#9FE1CB">Report</text>
+      <text x="130" y="124" text-anchor="middle" font-size="10" fill="var(--color-text-primary)" font-weight="500">Reporting Agent</text>
+      <text x="130" y="136" text-anchor="middle" font-size="9" fill="var(--color-text-tertiary)">LT-ready output</text>
+    </g>
+
+    <!-- Intelligence Hub (Perplexity) -->
+    <g class="node" onclick="sendPrompt('Tell me how to improve the Perplexity Intelligence Hub to drive adoption')">
+      <circle cx="215" cy="120" r="26" fill="#0F6E56" opacity=".85" stroke="#04342C" stroke-width="0.5"/>
+      <text x="215" y="117" text-anchor="middle" font-size="10" font-weight="500" fill="white">Intel</text>
+      <text x="215" y="129" text-anchor="middle" font-size="9" fill="#9FE1CB">Hub</text>
+      <text x="215" y="158" text-anchor="middle" font-size="10" fill="var(--color-text-primary)" font-weight="500">Intelligence Hub</text>
+      <text x="215" y="170" text-anchor="middle" font-size="9" fill="var(--color-text-tertiary)">Perplexity · existing</text>
+    </g>
+
+    <!-- Bank Social Media Listener -->
+    <g class="node" onclick="sendPrompt('Describe the Bank Social Media Listener agent design for Visa IPVMC')">
+      <circle cx="160" cy="185" r="17" fill="#378ADD" opacity=".85" stroke="#042C53" stroke-width="0.5"/>
+      <text x="160" y="182" text-anchor="middle" font-size="9" font-weight="500" fill="white">Social</text>
+      <text x="160" y="193" text-anchor="middle" font-size="8" fill="#B5D4F4">Listen</text>
+      <text x="160" y="216" text-anchor="middle" font-size="10" fill="var(--color-text-primary)" font-weight="500">Social Listener</text>
+      <text x="160" y="228" text-anchor="middle" font-size="9" fill="var(--color-text-tertiary)">Bank social signals</text>
+    </g>
+
+    <!-- PLAN CAREFULLY quadrant -->
+    <!-- Cross-sell/Upsell Rec -->
+    <g class="node" onclick="sendPrompt('Design the Cross-sell and Upsell Recommendation agent for Visa issuers')">
+      <circle cx="420" cy="80" r="28" fill="#534AB7" opacity=".85" stroke="#26215C" stroke-width="0.5"/>
+      <text x="420" y="77" text-anchor="middle" font-size="10" font-weight="500" fill="white">X-Sell</text>
+      <text x="420" y="89" text-anchor="middle" font-size="9" fill="#CECBF6">Rec</text>
+      <text x="420" y="120" text-anchor="middle" font-size="10" fill="var(--color-text-primary)" font-weight="500">Cross-sell / Upsell</text>
+      <text x="420" y="132" text-anchor="middle" font-size="9" fill="var(--color-text-tertiary)">Issuer revenue lever</text>
+    </g>
+
+    <!-- Multi-agent Issuer CVP -->
+    <g class="node" onclick="sendPrompt('Explain the multi-agent AI architecture for issuer CVP intelligence')">
+      <circle cx="520" cy="110" r="30" fill="#3C3489" opacity=".85" stroke="#1a1545" stroke-width="0.5"/>
+      <text x="520" y="107" text-anchor="middle" font-size="10" font-weight="500" fill="white">Multi</text>
+      <text x="520" y="119" text-anchor="middle" font-size="9" fill="#CECBF6">Agent</text>
+      <text x="520" y="152" text-anchor="middle" font-size="10" fill="var(--color-text-primary)" font-weight="500">Issuer CVP Intel</text>
+      <text x="520" y="164" text-anchor="middle" font-size="9" fill="var(--color-text-tertiary)">Multi-agent arch</text>
+    </g>
+
+    <!-- Predictive Analytics -->
+    <g class="node" onclick="sendPrompt('How should Gin design the Predictive Analytics AI agent for strategy')">
+      <circle cx="450" cy="185" r="20" fill="#185FA5" opacity=".85" stroke="#042C53" stroke-width="0.5"/>
+      <text x="450" y="182" text-anchor="middle" font-size="10" font-weight="500" fill="white">Pred</text>
+      <text x="450" y="194" text-anchor="middle" font-size="9" fill="#B5D4F4">Anlyt</text>
+      <text x="450" y="218" text-anchor="middle" font-size="10" fill="var(--color-text-primary)" font-weight="500">Predictive Analytics</text>
+      <text x="450" y="230" text-anchor="middle" font-size="9" fill="var(--color-text-tertiary)">Strategy forecasts</text>
+    </g>
+
+    <!-- OPPORTUNISTIC quadrant -->
+    <!-- Debit-to-credit x-sell -->
+    <g class="node" onclick="sendPrompt('Design the Debit to Credit cross-sell and portfolio upgrade agent for VCA')">
+      <circle cx="120" cy="325" r="17" fill="#BA7517" opacity=".85" stroke="#412402" stroke-width="0.5"/>
+      <text x="120" y="322" text-anchor="middle" font-size="9" font-weight="500" fill="white">D→C</text>
+      <text x="120" y="333" text-anchor="middle" font-size="8" fill="#FAC775">VCA</text>
+      <text x="120" y="356" text-anchor="middle" font-size="10" fill="var(--color-text-primary)" font-weight="500">Debit→Credit</text>
+      <text x="120" y="368" text-anchor="middle" font-size="9" fill="var(--color-text-tertiary)">Portfolio upgrade</text>
+    </g>
+
+    <!-- Strategy PPT Agent -->
+    <g class="node" onclick="sendPrompt('Help me build the Strategy PPT Agent with slide library logic')">
+      <circle cx="220" cy="360" r="19" fill="#EF9F27" opacity=".85" stroke="#412402" stroke-width="0.5"/>
+      <text x="220" y="357" text-anchor="middle" font-size="9" font-weight="500" fill="white">Strat</text>
+      <text x="220" y="368" text-anchor="middle" font-size="8" fill="#fff">PPT</text>
+      <text x="220" y="392" text-anchor="middle" font-size="10" fill="var(--color-text-primary)" font-weight="500">Strategy PPT</text>
+      <text x="220" y="404" text-anchor="middle" font-size="9" fill="var(--color-text-tertiary)">Slide library AI</text>
+    </g>
+
+    <!-- DEPRIORITISE quadrant -->
+    <!-- PMO Agent -->
+    <g class="node" onclick="sendPrompt('Should Gin deprioritise the Automated PMO Agent? Why?')">
+      <circle cx="390" cy="330" r="16" fill="#E24B4A" opacity=".75" stroke="#501313" stroke-width="0.5"/>
+      <text x="390" y="327" text-anchor="middle" font-size="9" font-weight="500" fill="white">PMO</text>
+      <text x="390" y="338" text-anchor="middle" font-size="8" fill="#F7C1C1">Auto</text>
+      <text x="390" y="360" text-anchor="middle" font-size="10" fill="var(--color-text-primary)" font-weight="500">PMO Agent</text>
+      <text x="390" y="372" text-anchor="middle" font-size="9" fill="var(--color-text-tertiary)">Automated reports</text>
+    </g>
+
+    <!-- X-border transaction alert -->
+    <g class="node" onclick="sendPrompt('Explain the Cross-border Transaction Alert agent design for IPVMC')">
+      <circle cx="510" cy="360" r="18" fill="#993C1D" opacity=".75" stroke="#4A1B0C" stroke-width="0.5"/>
+      <text x="510" y="357" text-anchor="middle" font-size="9" font-weight="500" fill="white">XB</text>
+      <text x="510" y="368" text-anchor="middle" font-size="8" fill="#F5C4B3">Alert</text>
+      <text x="510" y="392" text-anchor="middle" font-size="10" fill="var(--color-text-primary)" font-weight="500">X-border Alert</text>
+      <text x="510" y="404" text-anchor="middle" font-size="9" fill="var(--color-text-tertiary)">Txn monitoring</text>
+    </g>
+
+    <!-- legend -->
+    <text x="90" y="452" font-size="10" fill="var(--color-text-tertiary)">Bubble size = stakeholder visibility · Click any agent for details</text>
+  </svg>
+
+  <div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:6px">
+    <span class="chip c-green">Do Now — highest ROI</span>
+    <span class="chip c-blue">Plan Carefully — strategic bets</span>
+    <span class="chip c-amber">Opportunistic — quick wins available</span>
+    <span class="chip c-red">Deprioritise — complexity risk</span>
+  </div>
+</div>
+
+<!-- ═══════════ TAB 2: PORTFOLIO ═══════════ -->
+<div class="tab" id="tab-portfolio">
+  <div class="sec-label">Tab 2 of 4 · Full agent catalogue</div>
+  <div class="sec-title">Agent Portfolio — 13 Agents Prioritised</div>
+  <div class="sec-sub">Existing agents, your ideas, and new suggestions. Ranked by priority tier. Click any card to explore further.</div>
+
+  <div class="sec-label" style="margin-top:.5rem">Tier 1 — Do Now (0–4 weeks)</div>
+  <div class="g2">
+    <div class="agent-card" onclick="sendPrompt('How do I build the Reporting PPT Agent that auto-populates leadership-ready slides from market updates?')">
+      <div class="rank-badge">1</div>
+      <div class="agent-header"><div class="agent-name">Reporting PPT Agent</div><span class="chip c-teal">Your idea</span></div>
+      <div class="agent-who">LT · Hub lead · You</div>
+      <div class="agent-desc">Ingests market SCRUM updates → auto-generates LT-ready PPT with structured placeholders. Eliminates weekly slide-building labour. Immediate visible value to leadership.</div>
+      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">
+        <div class="score-row" style="margin:0;width:100%">
+          <span class="score-label" style="font-size:10px">Impact</span>
+          <div class="score-bar-bg"><div class="score-bar" style="width:90%;background:#1D9E75"></div></div>
+          <span class="score-val" style="font-size:10px;color:#1D9E75">9/10</span>
+        </div>
+        <div class="score-row" style="margin:0;width:100%">
+          <span class="score-label" style="font-size:10px">Effort</span>
+          <div class="score-bar-bg"><div class="score-bar" style="width:25%;background:#378ADD"></div></div>
+          <span class="score-val" style="font-size:10px;color:#378ADD">2/10</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="agent-card" onclick="sendPrompt('How do I improve the existing Intelligence Hub to solve the adoption and signal-noise problems?')">
+      <div class="rank-badge">2</div>
+      <div class="agent-header"><div class="agent-name">Intelligence Hub (Perplexity)</div><span class="chip c-green">Existing</span></div>
+      <div class="agent-who">Hub team · Market leads</div>
+      <div class="agent-desc">Already live. Needs: single-source interface, urgency triage, Skeptic QA pass, and market team co-ownership to solve adoption. Highest leverage through iteration, not rebuilding.</div>
+      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">
+        <div class="score-row" style="margin:0;width:100%">
+          <span class="score-label" style="font-size:10px">Impact</span>
+          <div class="score-bar-bg"><div class="score-bar" style="width:85%;background:#1D9E75"></div></div>
+          <span class="score-val" style="font-size:10px;color:#1D9E75">8.5/10</span>
+        </div>
+        <div class="score-row" style="margin:0;width:100%">
+          <span class="score-label" style="font-size:10px">Effort (iteration)</span>
+          <div class="score-bar-bg"><div class="score-bar" style="width:30%;background:#378ADD"></div></div>
+          <span class="score-val" style="font-size:10px;color:#378ADD">3/10</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="agent-card" onclick="sendPrompt('Design the Bank Social Media Listener agent for IPVMC — what signals should it track?')">
+      <div class="rank-badge">3</div>
+      <div class="agent-header"><div class="agent-name">Bank Social Media Listener</div><span class="chip c-blue">Existing idea</span></div>
+      <div class="agent-who">Market analysts · Country teams</div>
+      <div class="agent-desc">Monitors bank LinkedIn/Twitter/press for product launches, sentiment, hiring signals. Low-cost competitive intelligence. Surfaces what manual monitoring misses.</div>
+      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">
+        <div class="score-row" style="margin:0;width:100%">
+          <span class="score-label" style="font-size:10px">Impact</span>
+          <div class="score-bar-bg"><div class="score-bar" style="width:72%;background:#1D9E75"></div></div>
+          <span class="score-val" style="font-size:10px;color:#1D9E75">7/10</span>
+        </div>
+        <div class="score-row" style="margin:0;width:100%">
+          <span class="score-label" style="font-size:10px">Effort</span>
+          <div class="score-bar-bg"><div class="score-bar" style="width:35%;background:#378ADD"></div></div>
+          <span class="score-val" style="font-size:10px;color:#378ADD">3.5/10</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="agent-card" onclick="sendPrompt('What is a Regulatory Change Radar agent for payments in Southeast Asia?')">
+      <div class="rank-badge">4</div>
+      <div class="agent-header"><div class="agent-name">Regulatory Change Radar</div><span class="chip c-purple">New idea</span></div>
+      <div class="agent-who">Hub lead · Country GMs · Compliance</div>
+      <div class="agent-desc">Monitors central bank announcements, fintech regulatory updates, and MAS/SBV/BOT/OJK feeds. Flags changes with urgency score and implication summary. Immediate legal risk value.</div>
+      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">
+        <div class="score-row" style="margin:0;width:100%">
+          <span class="score-label" style="font-size:10px">Impact</span>
+          <div class="score-bar-bg"><div class="score-bar" style="width:80%;background:#1D9E75"></div></div>
+          <span class="score-val" style="font-size:10px;color:#1D9E75">8/10</span>
+        </div>
+        <div class="score-row" style="margin:0;width:100%">
+          <span class="score-label" style="font-size:10px">Effort</span>
+          <div class="score-bar-bg"><div class="score-bar" style="width:30%;background:#378ADD"></div></div>
+          <span class="score-val" style="font-size:10px;color:#378ADD">3/10</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-label" style="margin-top:1.25rem">Tier 2 — Plan Carefully (4–12 weeks)</div>
+  <div class="g2">
+    <div class="agent-card" onclick="sendPrompt('How would I design a Cross-sell and Upsell Recommendation agent for Visa issuers?')">
+      <div class="rank-badge">5</div>
+      <div class="agent-header"><div class="agent-name">Cross-sell / Upsell Recommender</div><span class="chip c-blue">Existing idea</span></div>
+      <div class="agent-who">Issuer client leads · VCA</div>
+      <div class="agent-desc">Analyses issuer portfolio data → surfaces prioritised cross-sell opportunities with script templates. Needs issuer data access design. High revenue linkage once built.</div>
+    </div>
+    <div class="agent-card" onclick="sendPrompt('How do I design multi-agent AI architecture for issuer CVP intelligence for Visa?')">
+      <div class="rank-badge">6</div>
+      <div class="agent-header"><div class="agent-name">Issuer CVP Intelligence</div><span class="chip c-blue">Existing idea</span></div>
+      <div class="agent-who">VCA · Client engagement leads</div>
+      <div class="agent-desc">Multi-agent: Researcher → Analyser → Positioning agent. Synthesises issuer CVP gaps vs Visa products. High-value but requires significant prompt architecture.</div>
+    </div>
+    <div class="agent-card" onclick="sendPrompt('How would a Competitive Win/Loss Analyser agent work for Visa payments?')">
+      <div class="rank-badge">7</div>
+      <div class="agent-header"><div class="agent-name">Competitive Win/Loss Analyser</div><span class="chip c-purple">New idea</span></div>
+      <div class="agent-who">Strategy · Country leads</div>
+      <div class="agent-desc">Ingests deal outcomes, competitor pricing, product features → identifies win/loss patterns. Surfaces "why we lose" insights. Feeds directly into quarterly strategy reviews.</div>
+    </div>
+    <div class="agent-card" onclick="sendPrompt('Design a Predictive Analytics agent for Visa IPVMC strategy forecasting')">
+      <div class="rank-badge">8</div>
+      <div class="agent-header"><div class="agent-name">Predictive Analytics Agent</div><span class="chip c-teal">Your idea</span></div>
+      <div class="agent-who">Hub lead · LT</div>
+      <div class="agent-desc">Uses historical market data + external signals to generate 3–6 month strategic forecasts. High LT visibility but requires data pipeline design and validation framework first.</div>
+    </div>
+  </div>
+
+  <div class="sec-label" style="margin-top:1.25rem">Tier 3 — Opportunistic (build when capacity allows)</div>
+  <div class="g2">
+    <div class="agent-card" onclick="sendPrompt('How do I build the Strategy PPT Agent with a slide library?')">
+      <div class="rank-badge">9</div>
+      <div class="agent-header"><div class="agent-name">Strategy PPT Agent</div><span class="chip c-teal">Your idea</span></div>
+      <div class="agent-who">Hub lead · Analysts</div>
+      <div class="agent-desc">Slide library + content-matching AI. User feeds topic → AI selects slide logic → outputs template with placeholders. Human refines. Time-saving but lower strategic leverage than Reporting Agent.</div>
+    </div>
+    <div class="agent-card" onclick="sendPrompt('Design the Debit to Credit cross-sell portfolio upgrade agent for VCA')">
+      <div class="rank-badge">10</div>
+      <div class="agent-header"><div class="agent-name">Debit → Credit Portfolio Agent</div><span class="chip c-blue">Existing idea</span></div>
+      <div class="agent-who">VCA · Issuer relationships</div>
+      <div class="agent-desc">Identifies debit card holders eligible for credit upgrade. Generates personalised outreach rationale. Revenue-linked but depends on issuer data access.</div>
+    </div>
+    <div class="agent-card" onclick="sendPrompt('What is a Meeting Intelligence Agent that could help Visa IPVMC teams?')">
+      <div class="rank-badge">11</div>
+      <div class="agent-header"><div class="agent-name">Meeting Intelligence Agent</div><span class="chip c-purple">New idea</span></div>
+      <div class="agent-who">All team members</div>
+      <div class="agent-desc">Auto-summarises meeting notes → extracts action items, decisions, risks → routes to relevant stakeholders. Lightweight adoption lever for frontline teams unfamiliar with AI.</div>
+    </div>
+  </div>
+
+  <div class="sec-label" style="margin-top:1.25rem">Tier 4 — Defer / Descope</div>
+  <div class="g2">
+    <div class="agent-card" style="opacity:.75" onclick="sendPrompt('Why should the Automated PMO Agent be deprioritised for now?')">
+      <div class="rank-badge" style="background:#FCEBEB;color:#791F1F;border-color:#F09595">12</div>
+      <div class="agent-header"><div class="agent-name">Automated PMO Agent</div><span class="chip c-red">Existing idea</span></div>
+      <div class="agent-who">PMO · Ops</div>
+      <div class="agent-desc">Automates progress reporting. High complexity, low frontline adoption likelihood. Risk of duplicating existing reporting tools. Defer until core adoption problems are solved.</div>
+    </div>
+    <div class="agent-card" style="opacity:.75" onclick="sendPrompt('Why is the Cross-border Transaction Alert deprioritised and what would it need to become viable?')">
+      <div class="rank-badge" style="background:#FCEBEB;color:#791F1F;border-color:#F09595">13</div>
+      <div class="agent-header"><div class="agent-name">Cross-border Transaction Alert</div><span class="chip c-red">Existing idea</span></div>
+      <div class="agent-who">Ops · Compliance</div>
+      <div class="agent-desc">Real-time transaction monitoring. Requires data infrastructure beyond current stack. High effort, regulatory sensitivity. Revisit in 6+ months when foundation is stable.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ TAB 3: CHANGE MANAGEMENT ═══════════ -->
+<div class="tab" id="tab-change">
+  <div class="sec-label">Tab 3 of 4 · Change management</div>
+  <div class="sec-title">5 Problems → Root Causes → Interventions</div>
+  <div class="sec-sub">Each problem mapped to its root cause and a prioritised intervention playbook. Colour = urgency of resolution.</div>
+
+  <div class="problem-card" style="border-left-color:#E24B4A">
+    <div class="problem-title">Problem 1 — Adoption & Value Clarity Gap</div>
+    <div class="problem-root">Root cause: Stakeholders cannot see the connection between the agent's output and a decision they need to make. Value is abstract, not embedded in a workflow.</div>
+    <div class="interventions">
+      <div class="intervention"><div class="int-dot" style="background:#E24B4A"></div><span><strong>Before/after demo:</strong> Show one concrete example — "This is what your Wednesday briefing prep looked like before. This is what it looks like now." One workflow, one person, one before/after.</span></div>
+      <div class="intervention"><div class="int-dot" style="background:#E24B4A"></div><span><strong>Stakeholder-specific output design:</strong> Each audience gets a dedicated view — LT gets executive brief, market leads get country signals, country teams get action flags. Not one generic output.</span></div>
+      <div class="intervention"><div class="int-dot" style="background:#E24B4A"></div><span><strong>"SoWhat" mandatory field:</strong> Every intelligence output ends with a decision-forcing implication. Removes interpretation burden from the reader.</span></div>
+    </div>
+  </div>
+
+  <div class="problem-card" style="border-left-color:#E24B4A">
+    <div class="problem-title">Problem 2 — AI = Additional Work (Workflow Friction)</div>
+    <div class="problem-root">Root cause: The agent was designed around what the builder found interesting to build, not around what a user was already doing. It creates a new workflow instead of replacing an existing one.</div>
+    <div class="interventions">
+      <div class="intervention"><div class="int-dot" style="background:#E24B4A"></div><span><strong>Replace, don't add:</strong> Map every existing workflow the team does manually (e.g. weekly PPT prep, competitive scan, reading industry news). The agent must replace one of these tasks entirely — not add alongside it.</span></div>
+      <div class="intervention"><div class="int-dot" style="background:#E24B4A"></div><span><strong>Zero-click delivery:</strong> Push outputs to where the user already is — Outlook inbox, Teams channel, PPT template — rather than requiring them to navigate to a new interface.</span></div>
+      <div class="intervention"><div class="int-dot" style="background:#E24B4A"></div><span><strong>One-sentence value test:</strong> If a user cannot complete "This agent saves me _____ every _____ by automatically _____" — the workflow integration is not clear enough yet.</span></div>
+    </div>
+  </div>
+
+  <div class="problem-card" style="border-left-color:#BA7517">
+    <div class="problem-title">Problem 3 — Lack of Frontline Buy-in</div>
+    <div class="problem-root">Root cause: Market teams were informed, not involved. Low ownership leads to passive resistance — not explicit rejection, just non-use.</div>
+    <div class="interventions">
+      <div class="intervention"><div class="int-dot" style="background:#BA7517"></div><span><strong>Co-design sprint (1 session per market):</strong> Bring one person from each market team into a 45-min session. Ask: "What do you spend the most time finding or preparing?" Build the next agent to solve that problem specifically.</span></div>
+      <div class="intervention"><div class="int-dot" style="background:#BA7517"></div><span><strong>Name a market champion:</strong> One person per market who owns the feedback loop. They are the first user, first critic, and first advocate. Not a bureaucratic role — just the person the hub team calls when outputs need calibrating.</span></div>
+      <div class="intervention"><div class="int-dot" style="background:#BA7517"></div><span><strong>Usage creates ownership:</strong> Instead of launching to everyone, launch to one pilot user per market. Let them be seen using it first. Social proof drives adoption faster than communication plans.</span></div>
+    </div>
+  </div>
+
+  <div class="problem-card" style="border-left-color:#BA7517">
+    <div class="problem-title">Problem 4 — Signal vs Noise</div>
+    <div class="problem-root">Root cause: Multiple agents running in parallel producing fragmented outputs. No single place where the most important things are visible at once.</div>
+    <div class="interventions">
+      <div class="intervention"><div class="int-dot" style="background:#BA7517"></div><span><strong>Single intelligence surface:</strong> All agent outputs flow into one interface — the Intelligence Hub. Power BI dashboard is the canonical view. No output should exist only in email or only in a Teams message.</span></div>
+      <div class="intervention"><div class="int-dot" style="background:#BA7517"></div><span><strong>Maximum 5 signals per cycle:</strong> Enforce a hard cap on what gets surfaced per delivery cycle. If the system cannot decide what the top 5 are, the urgency scoring rubric needs work — not the signal volume.</span></div>
+      <div class="intervention"><div class="int-dot" style="background:#BA7517"></div><span><strong>Kill the fragmented outputs:</strong> Audit all current agent outputs. Any output that isn't flowing into the central Lists schema and dashboard is creating noise. Consolidate or sunset it.</span></div>
+    </div>
+  </div>
+
+  <div class="problem-card" style="border-left-color:#888780">
+    <div class="problem-title">Problem 5 — Execution Bandwidth Constraint</div>
+    <div class="problem-root">Root cause: Too many builds in parallel. Each build is too wide in scope. No build is reaching the quality threshold needed to drive adoption before the next one starts.</div>
+    <div class="interventions">
+      <div class="intervention"><div class="int-dot" style="background:#888780"></div><span><strong>One agent at a time rule:</strong> No new agent starts until the previous one has at least 3 active non-builder users. This is a quality gate, not a timeline.</span></div>
+      <div class="intervention"><div class="int-dot" style="background:#888780"></div><span><strong>Pareto scope:</strong> For every agent, define the 20% of features that deliver 80% of the value. Build only that. Resist adding features during the first 4 weeks.</span></div>
+      <div class="intervention"><div class="int-dot" style="background:#888780"></div><span><strong>Time-box iterations:</strong> Each agent gets a 2-week quality sprint after launch. At the end of the sprint: adopt, iterate, or sunset. No agents in indefinite limbo.</span></div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="sec-label">Agent deployment decision tree</div>
+  <div class="sec-sub" style="margin-bottom:.75rem">Use this before committing any new agent to production. An agent that fails questions 1–3 should not launch.</div>
+
+  <div style="max-width:560px">
+    <div class="dt-node dt-q">Is the agent replacing an existing manual workflow (not adding a new one)?</div>
+    <div class="dt-row" style="margin-top:.4rem">
+      <div class="dt-col">
+        <div class="dt-arrow">↙ Yes</div>
+        <div class="dt-node dt-q">Does at least one non-builder stakeholder already want it?</div>
+        <div class="dt-row" style="margin-top:.3rem">
+          <div class="dt-col">
+            <div class="dt-arrow">↙ Yes</div>
+            <div class="dt-node dt-q">Can output be delivered where user already works (inbox / Teams / PPT)?</div>
+            <div class="dt-row" style="margin-top:.3rem">
+              <div class="dt-col">
+                <div class="dt-arrow">↙ Yes</div>
+                <div class="dt-node dt-yes">Build MVP. Pilot with 1–2 users. Gate on 3 active users before expanding.</div>
+              </div>
+              <div class="dt-col">
+                <div class="dt-arrow">↘ No</div>
+                <div class="dt-node dt-no">Redesign delivery layer first. Do not launch until output reaches user's existing surface.</div>
+              </div>
+            </div>
+          </div>
+          <div class="dt-col">
+            <div class="dt-arrow">↘ No</div>
+            <div class="dt-node dt-no">Run co-design session first. Do not build until a named user says "yes I would use this."</div>
+          </div>
+        </div>
+      </div>
+      <div class="dt-col">
+        <div class="dt-arrow">↘ No</div>
+        <div class="dt-node dt-hold">Do not build. Redesign scope to replace a specific existing task — or defer entirely.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ TAB 4: ROADMAP ═══════════ -->
+<div class="tab" id="tab-roadmap">
+  <div class="sec-label">Tab 4 of 4 · Execution plan</div>
+  <div class="sec-title">4-Phase Roadmap — From Friction to Flywheel</div>
+  <div class="sec-sub">Sequenced to solve change management problems first, then scale. Each phase gates on the previous phase's adoption metric being met.</div>
+
+  <div class="phase-row">
+    <div class="phase-block">
+      <div class="phase-num" style="color:#1D9E75">Phase 1</div>
+      <div class="phase-name">Stabilise & Win Fast</div>
+      <div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:6px">Weeks 1–4</div>
+      <div class="phase-items">
+        <div class="phase-item"><div class="pi-dot" style="background:#1D9E75"></div><span>Consolidate all agent outputs → single Intelligence Hub surface</span></div>
+        <div class="phase-item"><div class="pi-dot" style="background:#1D9E75"></div><span>Add SoWhat field + urgency rubric to all existing outputs</span></div>
+        <div class="phase-item"><div class="pi-dot" style="background:#1D9E75"></div><span>Build Reporting PPT Agent MVP (Tier 1 — immediate LT visibility)</span></div>
+        <div class="phase-item"><div class="pi-dot" style="background:#1D9E75"></div><span>Run 1 co-design session per market team</span></div>
+        <div class="phase-item"><div class="pi-dot" style="background:#1D9E75"></div><span>Gate: 3+ non-builder users engaging weekly</span></div>
+      </div>
+    </div>
+    <div class="phase-block">
+      <div class="phase-num" style="color:#378ADD">Phase 2</div>
+      <div class="phase-name">Deepen & Validate</div>
+      <div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:6px">Weeks 5–10</div>
+      <div class="phase-items">
+        <div class="phase-item"><div class="pi-dot" style="background:#378ADD"></div><span>Build Regulatory Change Radar (Tier 1 new idea)</span></div>
+        <div class="phase-item"><div class="pi-dot" style="background:#378ADD"></div><span>Add Skeptic QA pass to Intelligence Hub</span></div>
+        <div class="phase-item"><div class="pi-dot" style="background:#378ADD"></div><span>Deploy market champions (1 per country)</span></div>
+        <div class="phase-item"><div class="pi-dot" style="background:#378ADD"></div><span>Run 2-week quality sprint on Reporting Agent</span></div>
+        <div class="phase-item"><div class="pi-dot" style="background:#378ADD"></div><span>Gate: adoption rate ≥ 60% of intended audience weekly</span></div>
+      </div>
+    </div>
+    <div class="phase-block">
+      <div class="phase-num" style="color:#534AB7">Phase 3</div>
+      <div class="phase-name">Scale Intelligence</div>
+      <div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:6px">Weeks 11–20</div>
+      <div class="phase-items">
+        <div class="phase-item"><div class="pi-dot" style="background:#534AB7"></div><span>Build Cross-sell / Upsell Recommender (Tier 2)</span></div>
+        <div class="phase-item"><div class="pi-dot" style="background:#534AB7"></div><span>Begin Issuer CVP Intelligence architecture</span></div>
+        <div class="phase-item"><div class="pi-dot" style="background:#534AB7"></div><span>Launch Strategy PPT Agent (Tier 3 opportunistic)</span></div>
+        <div class="phase-item"><div class="pi-dot" style="background:#534AB7"></div><span>Power BI dashboard: trend views, confidence scores</span></div>
+        <div class="phase-item"><div class="pi-dot" style="background:#534AB7"></div><span>Gate: at least 2 agents cited in LT decision documents</span></div>
+      </div>
+    </div>
+    <div class="phase-block">
+      <div class="phase-num" style="color:#BA7517">Phase 4</div>
+      <div class="phase-name">Predictive Layer</div>
+      <div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:6px">Weeks 21+</div>
+      <div class="phase-items">
+        <div class="phase-item"><div class="pi-dot" style="background:#BA7517"></div><span>Predictive Analytics Agent — strategy forecasts</span></div>
+        <div class="phase-item"><div class="pi-dot" style="background:#BA7517"></div><span>Competitive Win/Loss Analyser</span></div>
+        <div class="phase-item"><div class="pi-dot" style="background:#BA7517"></div><span>Multi-agent Issuer CVP full build</span></div>
+        <div class="phase-item"><div class="pi-dot" style="background:#BA7517"></div><span>Revisit PMO / X-border alert if infra ready</span></div>
+        <div class="phase-item"><div class="pi-dot" style="background:#BA7517"></div><span>Gate: AI cited in ≥1 strategic decision per quarter</span></div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="sec-label">Change management — 3 commitments</div>
+  <div class="g3">
+    <div class="card">
+      <div style="font-size:13px;font-weight:500;margin-bottom:4px">Stop building new</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.5">No new agent starts until the previous one passes the 3-active-user gate. One agent done well is worth more than five agents used by nobody.</div>
+    </div>
+    <div class="card">
+      <div style="font-size:13px;font-weight:500;margin-bottom:4px">Make outputs do work</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.5">Every output must arrive in the user's existing workflow — inbox, PPT template, Teams — with a SoWhat statement attached. If it requires a new login or new interface, it will not be used.</div>
+    </div>
+    <div class="card">
+      <div style="font-size:13px;font-weight:500;margin-bottom:4px">Co-design, not broadcast</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.5">Market teams become co-owners, not recipients. One champion per market. Their feedback shapes the next iteration cycle. Adoption follows ownership.</div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function switchTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  const map={matrix:0,portfolio:1,change:2,roadmap:3};
+  document.querySelectorAll('.nav-btn')[map[id]].classList.add('active');
+}
+</script>
